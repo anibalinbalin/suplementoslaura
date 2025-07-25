@@ -1,0 +1,102 @@
+"use client"
+
+import type React from "react"
+
+import { useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { ArrowLeft, ArrowRight } from "lucide-react"
+import { Progress } from "@/components/ui/progress"
+import { useUser } from "@/context/user-context"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+
+export default function AgeSelectionPage() {
+  const router = useRouter()
+  const { userProfile, setAge } = useUser()
+  const [ageValue, setAgeValue] = useState<string>(userProfile.age ? userProfile.age.toString() : "")
+  const [error, setError] = useState("")
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const parsedAge = Number.parseInt(ageValue, 10)
+
+    if (isNaN(parsedAge) || parsedAge < 18 || parsedAge > 100) {
+      setError("Por favor, ingresa una edad válida entre 18 y 100 años")
+      return
+    }
+
+    console.log("Guardando edad:", parsedAge)
+    setAge(parsedAge)
+    router.push("/medications")
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-teal-50 flex flex-col">
+      <header className="container mx-auto py-6 px-4">
+        <div className="flex justify-between items-center">
+          <Link href="/gender-selection" className="inline-flex items-center text-teal-700 hover:text-teal-800">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Volver a selección de género
+          </Link>
+          <div className="text-sm text-gray-600">Paso 2 de 6</div>
+        </div>
+        <div className="mt-4">
+          <Progress value={33} className="h-2 bg-teal-100" />
+        </div>
+      </header>
+
+      <main className="flex-1 container mx-auto px-4 py-8">
+        <Card className="max-w-md mx-auto">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center text-teal-800">¿Cuál es tu edad?</CardTitle>
+            <CardDescription className="text-center">
+              Esta información nos ayuda a personalizar tus recomendaciones de suplementos según tu etapa de vida
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">{error}</div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="age">Edad (años)</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  min="18"
+                  max="100"
+                  placeholder="Ingresa tu edad"
+                  value={ageValue}
+                  onChange={(e) => {
+                    setAgeValue(e.target.value)
+                    setError("")
+                  }}
+                  className={error ? "border-red-500" : ""}
+                />
+              </div>
+
+              <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 flex items-center justify-center">
+                Continuar
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <p className="text-sm text-gray-600">
+              Puedes cambiar esta información en cualquier momento desde tu perfil.
+            </p>
+          </CardFooter>
+        </Card>
+      </main>
+
+      <footer className="py-4 text-center text-sm text-gray-600">
+        <p>Suplementos Uruguay &copy; {new Date().getFullYear()} - Todos los derechos reservados</p>
+      </footer>
+    </div>
+  )
+}
