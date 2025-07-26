@@ -28,7 +28,10 @@ import {
   Zap,
   HelpCircle,
   Calendar,
+  RefreshCw,
   Loader2,
+  Shield,
+  Download,
 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
@@ -36,6 +39,9 @@ import { useUser } from "@/context/user-context"
 import type { CombinacionSuplementos } from "@/lib/recommendation-service"
 import { suplementosExamine } from "@/lib/examine-data-es"
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure"
+import { MedicationInteractionWarning } from "@/components/medication-interaction-warning"
+import { toast } from "@/lib/toast"
+import { exportRecommendationsToPDF } from "@/lib/export-pdf"
 
 // Component to display detailed supplement information
 function SupplementDetails({ supplement, gender, age }: { 
@@ -119,6 +125,7 @@ export default function RecommendationsPage() {
   const [expandedDetails, setExpandedDetails] = useState<Record<string, boolean>>({})
   const [showExerciseInfo, setShowExerciseInfo] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [filterNoInteractions, setFilterNoInteractions] = useState(false)
 
   // Track which combination is currently being viewed
   const [activeCombination, setActiveCombination] = useState<number | null>(null)
@@ -192,7 +199,17 @@ export default function RecommendationsPage() {
   // Categorizar suplementos basados en su origen (análisis de sangre vs objetivos de salud)
   const [bloodTestSupplements, setBloodTestSupplements] = useState<string[]>([])
   const [bloodTestData, setBloodTestData] = useState<Record<string, { value: number; unit: string; status: string }>>({})
+  const [showScrollTop, setShowScrollTop] = useState(false)
   
+  // Handle scroll-to-top button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   // Si hay resultados de análisis de sangre, identificar qué suplementos vienen de ahí
   useEffect(() => {
     const supplements: string[] = []
@@ -830,7 +847,7 @@ export default function RecommendationsPage() {
         return examineData.beneficios.some((b) => b.includes(infoContent)) || false
       case "dosificacion":
         if (!examineData.dosificacion) return false
-        return (
+        return !!(
           (examineData.dosificacion.general && examineData.dosificacion.general.includes(infoContent)) ||
           (examineData.dosificacion.hombres && examineData.dosificacion.hombres.includes(infoContent)) ||
           (examineData.dosificacion.mujeres && examineData.dosificacion.mujeres.includes(infoContent))
@@ -1146,8 +1163,10 @@ export default function RecommendationsPage() {
   const toggleFavorite = (id: number) => {
     setFavorites((prev) => {
       if (prev.includes(id)) {
+        toast.info("Eliminado de favoritos")
         return prev.filter((favId) => favId !== id)
       } else {
+        toast.success("Agregado a favoritos")
         return [...prev, id]
       }
     })
@@ -1155,8 +1174,11 @@ export default function RecommendationsPage() {
 
   const handleStartOver = () => {
     if (confirm("¿Estás seguro de que quieres comenzar de nuevo? Esto borrará todos tus datos actuales.")) {
+      toast.info("Reiniciando perfil...", "Todos tus datos han sido eliminados")
       resetProfile()
-      window.location.href = "/"
+      setTimeout(() => {
+        window.location.href = "/"
+      }, 500)
     }
   }
 
@@ -1181,13 +1203,37 @@ export default function RecommendationsPage() {
           </Link>
           <div className="flex items-center gap-4">
             <div className="text-sm text-gray-600">Paso 6 de 6</div>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
-              onClick={handleStartOver}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={async () => {
+                try {
+                  toast.loading("Generando PDF...")
+                  await exportRecommendationsToPDF(
+                    supplements.map(s => ({
+                      nombre: traducirNombre(s.nombre),
+                      beneficios: s.beneficios,
+                      dosificacion: s.dosificacion,
+                      momentoOptimo: s.momentoOptimo,
+                      consejosAbsorcion: s.consejosAbsorcion,
+                      interaccionesMedicamentos: s.interaccionesMedicamentos
+                    })),
+                    {
+                      gender: userProfile?.gender || undefined,
+                      age: userProfile?.age || undefined,
+                      healthGoals: userProfile?.healthGoals || [],
+                      medications: userProfile?.medications || undefined
+                    }
+                  )
+                  toast.success("¡PDF descargado exitosamente!")
+                } catch (error) {
+                  toast.error("Error al generar el PDF", "Por favor intenta nuevamente")
+                }
+              }}
+              className="text-teal-600 hover:text-teal-700 hover:bg-teal-50"
             >
-              Comenzar de nuevo
+              <Download className="h-4 w-4 mr-2" />
+              Exportar PDF
             </Button>
           </div>
         </div>
@@ -1199,6 +1245,54 @@ export default function RecommendationsPage() {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
           <h1 className="text-3xl font-bold text-teal-800 mb-2 text-center">Tus Recomendaciones Personalizadas</h1>
+          
+          {/* Mostrar advertencias de interacciones medicamentosas si existen */}
+          {userProfile?.medications && supplements && (() => {
+            const allInteractions = supplements
+              .filter(s => s.interaccionesMedicamentos && s.interaccionesMedicamentos.length > 0)
+              .flatMap(s => {
+                return s.interaccionesMedicamentos.map((interaction: string) => {
+                  // Determinar severidad basada en el contenido de la interacción
+                  let severity: "high" | "moderate" | "low" = "moderate"
+                  if (interaction.includes("🔴") || interaction.includes("MAYOR")) {
+                    severity = "high"
+                  } else if (interaction.includes("⚠️") || interaction.includes("MODERADA")) {
+                    severity = "moderate"
+                  } else if (interaction.includes("💡") || interaction.includes("MENOR")) {
+                    severity = "low"
+                  }
+                  
+                  // Extraer medicamento específico si está mencionado
+                  let medication = userProfile.medications
+                  const medicationMatch = interaction.match(/warfarina|heparina|aspirina|clopidogrel|apixaban|rivaroxaban|metformina|insulina|estatinas|antihipertensivos|anticonceptivos|sedantes|antidepresivos/i)
+                  if (medicationMatch) {
+                    medication = medicationMatch[0]
+                  }
+                  
+                  // Limpiar descripción de emojis y extraer recomendación
+                  const cleanDescription = interaction.replace(/[🔴⚠️💡]/g, '').trim()
+                  const parts = cleanDescription.split('.')
+                  const description = parts[0] + (parts[1] ? '.' : '')
+                  const recommendation = parts.slice(1).join('.').trim() || "Consulte con su médico antes de tomar este suplemento."
+                  
+                  return {
+                    supplement: traducirNombre(s.nombre),
+                    medication: medication,
+                    severity: severity,
+                    description: description,
+                    recommendation: recommendation
+                  }
+                })
+              })
+            
+            return allInteractions.length > 0 ? (
+              <MedicationInteractionWarning 
+                interactions={allInteractions} 
+                medications={userProfile.medications}
+              />
+            ) : null
+          })()}
+          
           <div className="bg-white p-4 rounded-lg shadow-sm mb-8">
             <div className="flex items-center gap-2 text-teal-700">
               <Info className="h-5 w-5" />
@@ -1231,6 +1325,28 @@ export default function RecommendationsPage() {
             </TabsList>
 
             <TabsContent value="supplements" className="space-y-6">
+              {/* Filtro para suplementos sin interacciones */}
+              {userProfile?.medications && supplements && supplements.some(s => s.interaccionesMedicamentos && s.interaccionesMedicamentos.length > 0) && (
+                <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Shield className="h-5 w-5 text-teal-600" />
+                      <span className="text-sm font-medium text-gray-700">
+                        Mostrar solo suplementos sin interacciones medicamentosas
+                      </span>
+                    </div>
+                    <Button
+                      variant={filterNoInteractions ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setFilterNoInteractions(!filterNoInteractions)}
+                      className={filterNoInteractions ? "bg-teal-600 hover:bg-teal-700" : ""}
+                    >
+                      {filterNoInteractions ? "Mostrar todos" : "Filtrar"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
               {/* Sección de suplementos basados en análisis de sangre */}
               {bloodTestSupplements.length > 0 && (
                 <div className="mb-8">
@@ -1248,7 +1364,10 @@ export default function RecommendationsPage() {
                     </div>
                   </div>
                   <div className="space-y-6">
-                    {supplements.filter(s => s.fromBloodTest).map((supplement) => (
+                    {supplements
+                      .filter(s => s.fromBloodTest)
+                      .filter(s => !filterNoInteractions || !s.interaccionesMedicamentos || s.interaccionesMedicamentos.length === 0)
+                      .map((supplement) => (
                 <Card key={supplement.id} className="overflow-hidden border-2 border-red-200 bg-red-50/20">
                   <div className="md:flex">
                     <div className="md:w-1/4 bg-red-50 flex items-center justify-center p-4">
@@ -1375,9 +1494,51 @@ export default function RecommendationsPage() {
                         </div>
                         <AffiliateDisclosure variant="inline" className="mt-2" />
                         {supplement.interaccionesMedicamentos && supplement.interaccionesMedicamentos.length > 0 && (
-                          <div className="mt-2 text-red-600 text-sm flex items-center gap-1">
-                            <AlertTriangle className="h-3 w-3" />
-                            <span>Posibles interacciones medicamentosas</span>
+                          <div className="mt-3">
+                            {supplement.interaccionesMedicamentos.map((interaction: string, idx: number) => {
+                              const severity = interaction.includes("🔴") || interaction.includes("MAYOR") ? "high" : 
+                                             interaction.includes("⚠️") || interaction.includes("MODERADA") ? "moderate" : "low"
+                              
+                              const severityConfig = {
+                                high: {
+                                  bg: "bg-red-50",
+                                  border: "border-red-200",
+                                  icon: "text-red-600",
+                                  text: "text-red-800",
+                                  title: "Interacción Importante"
+                                },
+                                moderate: {
+                                  bg: "bg-amber-50",
+                                  border: "border-amber-200",
+                                  icon: "text-amber-600",
+                                  text: "text-amber-800",
+                                  title: "Precaución"
+                                },
+                                low: {
+                                  bg: "bg-yellow-50",
+                                  border: "border-yellow-200",
+                                  icon: "text-yellow-600",
+                                  text: "text-yellow-800",
+                                  title: "Información"
+                                }
+                              }[severity]
+                              
+                              return (
+                                <div key={idx} className={`${severityConfig.bg} border ${severityConfig.border} rounded-lg p-3 mb-2`}>
+                                  <div className="flex items-start gap-2">
+                                    <Info className={`h-4 w-4 ${severityConfig.icon} mt-0.5 flex-shrink-0`} />
+                                    <div className="flex-1">
+                                      <p className={`text-xs font-medium ${severityConfig.text} mb-1`}>
+                                        {severityConfig.title}
+                                      </p>
+                                      <p className={`text-xs ${severityConfig.text}`}>
+                                        {interaction}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            })}
                           </div>
                         )}
 
@@ -1420,7 +1581,10 @@ export default function RecommendationsPage() {
                     </div>
                   </div>
                   <div className="space-y-6">
-                    {supplements.filter(s => !s.fromBloodTest).map((supplement) => (
+                    {supplements
+                      .filter(s => !s.fromBloodTest)
+                      .filter(s => !filterNoInteractions || !s.interaccionesMedicamentos || s.interaccionesMedicamentos.length === 0)
+                      .map((supplement) => (
                       <Card key={supplement.id} className="overflow-hidden">
                         <div className="md:flex">
                           <div className="md:w-1/4 bg-gray-50 flex items-center justify-center p-4">
@@ -2147,6 +2311,41 @@ export default function RecommendationsPage() {
             </TabsContent>
           </Tabs>
         </div>
+
+        {/* Footer con botón de comenzar de nuevo */}
+        <div className="mt-16 border-t border-gray-200 pt-8 pb-8">
+          <div className="text-center space-y-4">
+            <p className="text-gray-600">
+              ¿Quieres ajustar tus recomendaciones?
+            </p>
+            <Button 
+              variant="outline" 
+              size="lg"
+              onClick={handleStartOver}
+              className="group relative overflow-hidden border-2 border-teal-600 text-teal-700 hover:text-white transition-all duration-300"
+            >
+              <span className="absolute inset-0 bg-teal-600 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
+              <span className="relative flex items-center">
+                <RefreshCw className="h-5 w-5 mr-2" />
+                Comenzar de nuevo
+              </span>
+            </Button>
+            <p className="text-sm text-gray-500 max-w-md mx-auto">
+              Al comenzar de nuevo, podrás actualizar tu información y obtener nuevas recomendaciones personalizadas.
+            </p>
+          </div>
+        </div>
+
+        {/* Botón flotante para volver arriba */}
+        {showScrollTop && (
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="fixed bottom-8 right-8 bg-teal-600 text-white p-3 rounded-full shadow-lg hover:bg-teal-700 transition-all duration-300 transform hover:scale-110 z-50"
+            aria-label="Volver arriba"
+          >
+            <ChevronUp className="h-6 w-6" />
+          </button>
+        )}
       </main>
     </div>
   )

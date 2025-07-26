@@ -917,7 +917,7 @@ export default function AnalisisSangrePage() {
       </main>
 
       <footer className="py-4 text-center text-sm text-gray-600">
-        <p>Suplementos Uruguay &copy; {new Date().getFullYear()} - Todos los derechos reservados</p>
+        <p>Suplementos+ &copy; {new Date().getFullYear()} - Todos los derechos reservados</p>
         <p className="mt-1">
           Datos basados en evidencia científica actualizada
         </p>

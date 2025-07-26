@@ -57,3 +57,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Import mobile optimizations */
+@import './mobile-optimizations.css';
+
+/* Import form transitions */
+@import './form-transitions.css';

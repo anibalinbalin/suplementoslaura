@@ -1,0 +1,126 @@
+/* Optimizaciones para dispositivos móviles */
+
+@media (max-width: 640px) {
+  /* Reducir padding en contenedores principales */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Ajustar tamaños de fuente para móviles */
+  h1 {
+    font-size: 1.75rem !important;
+  }
+
+  h2 {
+    font-size: 1.5rem !important;
+  }
+
+  h3 {
+    font-size: 1.25rem !important;
+  }
+
+  /* Mejorar cards en móviles */
+  .card {
+    margin: 0.5rem;
+  }
+
+  /* Botones full width en móviles */
+  .btn-mobile-full {
+    width: 100% !important;
+  }
+
+  /* Stack de elementos en móviles */
+  .flex-mobile-col {
+    flex-direction: column !important;
+  }
+
+  /* Ajustar padding de cards */
+  .card-content {
+    padding: 1rem !important;
+  }
+
+  /* Mejorar espaciado de formularios */
+  .form-item {
+    margin-bottom: 1rem;
+  }
+
+  /* Hacer las imágenes responsivas */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Mejorar diálogos en móviles */
+  .dialog-content {
+    margin: 1rem;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  /* Ajustar tablas para móviles */
+  table {
+    font-size: 0.875rem;
+  }
+
+  /* Mejorar navegación */
+  .nav-mobile {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    padding: 0.5rem;
+    z-index: 50;
+  }
+
+  /* Ajustar márgenes y padding */
+  .p-mobile-2 {
+    padding: 0.5rem !important;
+  }
+
+  .m-mobile-2 {
+    margin: 0.5rem !important;
+  }
+
+  /* Mejorar legibilidad */
+  body {
+    font-size: 16px; /* Prevenir zoom en iOS */
+  }
+
+  input,
+  textarea,
+  select {
+    font-size: 16px; /* Prevenir zoom en iOS */
+  }
+}
+
+/* Mejoras táctiles */
+@media (hover: none) and (pointer: coarse) {
+  /* Aumentar áreas táctiles */
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Mejorar hover states para táctil */
+  button:active,
+  a:active {
+    opacity: 0.8;
+  }
+}
+
+/* Landscape móvil */
+@media (max-width: 812px) and (orientation: landscape) {
+  .min-h-screen {
+    min-height: 100vh;
+  }
+
+  header {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+}

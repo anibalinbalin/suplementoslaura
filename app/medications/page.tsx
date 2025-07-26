@@ -11,6 +11,7 @@ import { ArrowLeft, ArrowRight, AlertCircle } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { useUser } from "@/context/user-context"
 import { Textarea } from "@/components/ui/textarea"
+import { toast } from "@/lib/toast"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -24,8 +25,27 @@ export default function MedicationsPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Save medications info to context
-    setMedications(takingMeds === "yes" ? medsDetails : "")
+    if (!takingMeds) {
+      toast.error("Selección requerida", "Por favor indica si tomas medicamentos")
+      return
+    }
+
+    if (takingMeds === "yes") {
+      if (!medsDetails.trim()) {
+        toast.error("Información requerida", "Por favor lista los medicamentos que tomas")
+        return
+      }
+      // Validar formato básico
+      if (medsDetails.trim().length < 3) {
+        toast.error("Información incompleta", "Por favor proporciona más detalles sobre tus medicamentos")
+        return
+      }
+      setMedications(medsDetails.trim())
+      toast.success("Medicamentos guardados", "Verificaremos las interacciones para tu seguridad")
+    } else {
+      setMedications("")
+      toast.success("Información guardada")
+    }
 
     // Navigate to the health goals page
     router.push("/health-goals")
@@ -47,7 +67,7 @@ export default function MedicationsPage() {
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-8">
-        <Card className="max-w-2xl mx-auto">
+        <Card className="max-w-2xl mx-auto form-scale-in card-transition">
           <CardHeader>
             <CardTitle className="text-2xl text-center text-teal-800">Información sobre medicamentos</CardTitle>
             <CardDescription className="text-center">
@@ -74,7 +94,7 @@ export default function MedicationsPage() {
                     <RadioGroupItem value="yes" id="yes" className="peer sr-only" />
                     <Label
                       htmlFor="yes"
-                      className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-teal-600 peer-data-[state=checked]:bg-teal-50 [&:has([data-state=checked])]:border-primary cursor-pointer"
+                      className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-teal-600 peer-data-[state=checked]:bg-teal-50 [&:has([data-state=checked])]:border-primary cursor-pointer selection-transition"
                     >
                       <span className="font-medium">Sí</span>
                     </Label>
@@ -84,7 +104,7 @@ export default function MedicationsPage() {
                     <RadioGroupItem value="no" id="no" className="peer sr-only" />
                     <Label
                       htmlFor="no"
-                      className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-teal-600 peer-data-[state=checked]:bg-teal-50 [&:has([data-state=checked])]:border-primary cursor-pointer"
+                      className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-teal-600 peer-data-[state=checked]:bg-teal-50 [&:has([data-state=checked])]:border-primary cursor-pointer selection-transition"
                     >
                       <span className="font-medium">No</span>
                     </Label>
@@ -100,7 +120,7 @@ export default function MedicationsPage() {
                     placeholder="Ejemplo: Atorvastatina 20mg, Levotiroxina 50mcg, etc."
                     value={medsDetails}
                     onChange={(e) => setMedsDetails(e.target.value)}
-                    className="min-h-[100px]"
+                    className="min-h-[100px] input-transition"
                   />
                   <p className="text-sm text-gray-500">
                     Incluye el nombre y la dosis de cada medicamento si la conoces.
@@ -108,7 +128,7 @@ export default function MedicationsPage() {
                 </div>
               )}
 
-              <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 flex items-center justify-center">
+              <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 flex items-center justify-center button-transition">
                 Continuar
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -123,7 +143,7 @@ export default function MedicationsPage() {
       </main>
 
       <footer className="py-4 text-center text-sm text-gray-600">
-        <p>Suplementos Uruguay &copy; {new Date().getFullYear()} - Todos los derechos reservados</p>
+        <p>Suplementos+ &copy; {new Date().getFullYear()} - Todos los derechos reservados</p>
       </footer>
     </div>
   )

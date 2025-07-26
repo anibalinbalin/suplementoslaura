@@ -41,7 +41,9 @@ export function createAffiliateLink(originalUrl: string, customParams?: Record<s
     // Nota: Los parámetros exactos dependerán del programa de afiliados de ML
     // Estos son ejemplos comunes, ajustar según la documentación oficial
     url.searchParams.set('tracking_id', config.affiliateId)
-    url.searchParams.set('campaign', config.campaign)
+    if (config.campaign) {
+      url.searchParams.set('campaign', config.campaign)
+    }
     
     // Agregar timestamp para tracking único
     url.searchParams.set('click_id', `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`)

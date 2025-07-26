@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import type { SupplementRecommendation } from "@/lib/gemini-service"
 import type { BloodTestResult } from "@/lib/blood-markers"
+import { secureStorage, needsMigration } from "@/lib/crypto-storage"
 
 interface UserProfile {
   gender: "male" | "female" | null
@@ -49,18 +50,22 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile>(() => {
     // Intenta cargar el perfil desde localStorage al iniciar
     if (typeof window !== 'undefined') {
-      const savedProfile = localStorage.getItem(STORAGE_KEY)
+      // Verificar si necesita migración
+      if (needsMigration(STORAGE_KEY)) {
+        secureStorage.migrateExistingData(STORAGE_KEY)
+      }
+      
+      const savedProfile = secureStorage.getItem(STORAGE_KEY)
       if (savedProfile) {
         try {
-          const parsed = JSON.parse(savedProfile)
           // Convert date strings back to Date objects for bloodTestResults
-          if (parsed.bloodTestResults) {
-            parsed.bloodTestResults = parsed.bloodTestResults.map((result: any) => ({
+          if (savedProfile.bloodTestResults) {
+            savedProfile.bloodTestResults = savedProfile.bloodTestResults.map((result: any) => ({
               ...result,
               date: new Date(result.date)
             }))
           }
-          return parsed
+          return savedProfile
         } catch (e) {
           console.error('Error loading saved profile:', e)
         }
@@ -69,10 +74,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
     return initialProfile
   })
 
-  // Guardar en localStorage cuando el perfil cambie
+  // Guardar en localStorage cifrado cuando el perfil cambie
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(userProfile))
+      secureStorage.setItem(STORAGE_KEY, userProfile)
     }
   }, [userProfile])
 
@@ -115,7 +120,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const resetProfile = () => {
     setUserProfile(initialProfile)
     if (typeof window !== 'undefined') {
-      localStorage.removeItem(STORAGE_KEY)
+      secureStorage.removeItem(STORAGE_KEY)
     }
   }
 

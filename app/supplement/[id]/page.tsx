@@ -710,7 +710,7 @@ export default function SupplementDetailPage() {
             La información proporcionada es solo para fines educativos y no pretende ser un consejo médico.
           </p>
           <p className="text-sm text-teal-100 mt-2">
-            Suplementos Uruguay &copy; {new Date().getFullYear()} - Todos los derechos reservados
+            Suplementos+ &copy; {new Date().getFullYear()} - Todos los derechos reservados
           </p>
         </div>
       </footer>

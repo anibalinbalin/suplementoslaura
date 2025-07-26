@@ -1551,26 +1551,41 @@ const CATEGORIAS_MEDICAMENTOS: Record<string, string[]> = {
 const INTERACCIONES_SUPLEMENTOS: Record<string, Record<string, string[]>> = {
   "Omega-3": {
     ANTICOAGULANTES: [
-      "Puede aumentar el riesgo de sangrado cuando se toma con anticoagulantes como warfarina, heparina o aspirina. Consulte con su médico antes de combinarlos.",
+      "⚠️ MODERADA: Dosis altas (>3g/día) pueden aumentar ligeramente el tiempo de sangrado. En dosis normales (1-2g/día) el riesgo es mínimo. Si toma warfarina, mantenga dosis consistente y notifique a su médico.",
     ],
     PRESION_ARTERIAL: [
-      "Puede tener un efecto aditivo en la reducción de la presión arterial cuando se toma con medicamentos antihipertensivos. Monitoree su presión arterial regularmente.",
+      "⚠️ MODERADA: Efecto aditivo en la reducción de la presión arterial con medicamentos antihipertensivos. Monitoree su presión arterial regularmente.",
+    ],
+    ANTICONCEPTIVOS: [
+      "⚠️ MODERADA: Dosis altas pueden reducir la efectividad de anticonceptivos hormonales. Considere métodos adicionales de protección.",
     ],
   },
   "Vitamina D": {
     TIROIDES: [
-      "Puede afectar la absorción de medicamentos para la tiroides como levotiroxina. Tome la vitamina D al menos 4 horas antes o después de estos medicamentos.",
+      "⚠️ MODERADA: Puede afectar la absorción de levotiroxina. Tome la vitamina D al menos 4 horas después de medicamentos tiroideos.",
     ],
     COLESTEROL: [
-      "Puede reducir la eficacia de las estatinas. Consulte con su médico sobre los niveles adecuados de suplementación.",
+      "⚠️ MODERADA: Las estatinas pueden reducir la síntesis de vitamina D. Considere monitorear niveles y ajustar suplementación. Total: 91 interacciones (11 mayores, 79 moderadas).",
+    ],
+    DIGOXINA: [
+      "🔴 MAYOR: Riesgo de toxicidad por digoxina si desarrolla hipercalcemia. Requiere monitoreo estrecho de niveles de calcio.",
+    ],
+    DIURETICOS: [
+      "🔴 MAYOR: Con tiazidas puede causar hipercalcemia peligrosa. Monitoree niveles de calcio regularmente.",
     ],
   },
   Magnesio: {
     ANTIBIOTICOS: [
-      "Puede reducir la absorción de antibióticos, especialmente tetraciclinas y fluoroquinolonas. Separe la toma por al menos 2-3 horas.",
+      "🔴 MAYOR: Reduce significativamente la absorción de quinolonas y tetraciclinas. Separe por 2 horas antes o 4-6 horas después del antibiótico. Total: 230 interacciones (10 mayores, 128 moderadas).",
     ],
     PRESION_ARTERIAL: [
-      "Puede tener un efecto aditivo en la reducción de la presión arterial. Monitoree su presión arterial si toma medicamentos antihipertensivos.",
+      "⚠️ MODERADA: Efecto aditivo hipotensor. Monitoree presión arterial con precaución.",
+    ],
+    BIFOSFONATOS: [
+      "⚠️ MODERADA: Reduce absorción de alendronato, risedronato. Separe por al menos 2 horas.",
+    ],
+    TIROIDES: [
+      "⚠️ MODERADA: Reduce absorción de levotiroxina. Separe por al menos 4 horas.",
     ],
   },
   Hierro: {
@@ -1583,15 +1598,15 @@ const INTERACCIONES_SUPLEMENTOS: Record<string, Record<string, string[]>> = {
   },
   "Hierba de San Juan": {
     ANTIDEPRESIVOS: [
-      "Puede causar síndrome serotoninérgico cuando se combina con antidepresivos ISRS. Esta combinación puede ser peligrosa y debe evitarse completamente.",
+      "🔴 MAYOR: Puede causar síndrome serotoninérgico cuando se combina con antidepresivos ISRS. Esta combinación debe evitarse.",
     ],
     ANTICOAGULANTES: [
-      "Puede reducir la eficacia de los anticoagulantes, poniendo en riesgo la salud cardiovascular. No combine sin supervisión médica.",
+      "🔴 MAYOR: Puede reducir significativamente los niveles de warfarina en sangre, disminuyendo su efectividad. Requiere supervisión médica estrecha y ajuste de dosis.",
     ],
   },
   "Ginkgo Biloba": {
     ANTICOAGULANTES: [
-      "Puede aumentar el riesgo de sangrado cuando se toma con anticoagulantes. Evite esta combinación o use solo bajo estricta supervisión médica.",
+      "⚠️ MODERADA: Puede aumentar el riesgo de sangrado. Si toma warfarina, consulte con su médico antes de usar. Monitoree signos de sangrado inusual.",
     ],
     ANTIDEPRESIVOS: [
       "Puede interactuar con antidepresivos y causar efectos secundarios como aumento de la presión arterial o síndrome serotoninérgico.",
@@ -1599,7 +1614,10 @@ const INTERACCIONES_SUPLEMENTOS: Record<string, Record<string, string[]>> = {
   },
   Probióticos: {
     ANTIBIOTICOS: [
-      "Tomar separados por al menos 2-3 horas de los antibióticos para evitar que estos últimos destruyan las bacterias beneficiosas del probiótico.",
+      "⚠️ MODERADA: Tomar separados por al menos 2-3 horas de los antibióticos para evitar que estos últimos destruyan las bacterias beneficiosas del probiótico.",
+    ],
+    ANTICOAGULANTES: [
+      "⚠️ MODERADA: Ciertos probióticos pueden aumentar los niveles locales de vitamina K en el intestino, potencialmente reduciendo la efectividad de warfarina. Si toma warfarina, monitoree su INR regularmente. Esta interacción NO ocurre con anticoagulantes más nuevos (DOACs).",
     ],
   },
   Calcio: {
@@ -1618,9 +1636,82 @@ const INTERACCIONES_SUPLEMENTOS: Record<string, Record<string, string[]>> = {
       "El uso prolongado conjunto con antiinflamatorios no esteroideos podría aumentar el estrés renal. Manténgase bien hidratado y consulte con su médico si tiene problemas renales.",
     ],
   },
-  "Vitamina K": {
+  "Vitamina K2": {
     ANTICOAGULANTES: [
-      "Interfiere directamente con la acción de anticoagulantes como la warfarina. Debe mantener una ingesta constante de vitamina K si toma estos medicamentos.",
+      "🔴 MAYOR: Antagoniza directamente warfarina. NO inicie sin supervisión médica. Mantenga ingesta consistente si ya toma warfarina. Nota: No interactúa con anticoagulantes nuevos (DOACs).",
+    ],
+  },
+  Ashwagandha: {
+    SEDANTES: [
+      "🔴 MAYOR: Riesgo de sedación excesiva con benzodiacepinas, barbitúricos. Total: 444 interacciones (7 mayores, 260 moderadas). Evite combinar.",
+    ],
+    DIABETES: [
+      "⚠️ MODERADA: Puede potenciar efecto hipoglucémico de metformina, insulina. Monitoree glucosa sanguínea estrechamente.",
+    ],
+    TIROIDES: [
+      "⚠️ MODERADA: Puede alterar función tiroidea. Separe de levotiroxina por 4 horas y monitoree TSH.",
+    ],
+    INMUNOSUPRESORES: [
+      "⚠️ MODERADA: Puede interferir con ciclosporina, tacrolimus. Consulte con su médico antes de usar.",
+    ],
+  },
+  "Coenzima Q10": {
+    ESTATINAS: [
+      "💡 BENEFICIOSA: Las estatinas reducen niveles de CoQ10. La suplementación puede aliviar dolores musculares asociados.",
+    ],
+    ANTICOAGULANTES: [
+      "⚠️ MODERADA: Puede reducir efectividad de warfarina. Monitoree INR si combina.",
+    ],
+    DIABETES: [
+      "⚠️ MODERADA: Puede reducir glucosa sanguínea. Ajuste dosis de medicamentos si es necesario.",
+    ],
+  },
+  "NAC (N-Acetil Cisteína)": {
+    NITROGLICERINA: [
+      "🔴 MAYOR: Potencia efecto vasodilatador causando hipotensión severa. Evite combinación.",
+    ],
+    CARBON_ACTIVADO: [
+      "⚠️ MODERADA: Reduce absorción de NAC. Separe por al menos 2 horas.",
+    ],
+  },
+  "Vitamina E": {
+    ANTICOAGULANTES: [
+      "⚠️ MODERADA: Dosis altas (>400 UI/día) pueden aumentar el riesgo de sangrado. En dosis normales (200-400 UI/día) el riesgo es bajo. Informe a su médico si toma warfarina.",
+    ],
+    QUIMIOTERAPIA: [
+      "⚠️ MODERADA: Puede interferir con algunos agentes quimioterapéuticos. Consulte oncólogo.",
+    ],
+  },
+  "Extracto de Té Verde": {
+    ANTICOAGULANTES: [
+      "⚠️ MODERADA: El contenido de vitamina K puede reducir ligeramente la efectividad de warfarina. Mantenga consumo consistente y notifique a su médico. El EGCG en dosis altas puede aumentar tiempo de sangrado.",
+    ],
+    HEPATOTOXICOS: [
+      "🔴 MAYOR: Riesgo aumentado de daño hepático con medicamentos hepatotóxicos. No exceda 800mg EGCG/día.",
+    ],
+  },
+  Zinc: {
+    ANTIBIOTICOS: [
+      "⚠️ MODERADA: Reduce absorción mutua con quinolonas y tetraciclinas. Separe por 2-4 horas.",
+    ],
+    PENICILAMINA: [
+      "⚠️ MODERADA: Reduce absorción del medicamento. Evite combinación o separe ampliamente.",
+    ],
+  },
+  "Complejo B": {
+    LEVODOPA: [
+      "⚠️ MODERADA: La vitamina B6 puede reducir efectividad de levodopa. Use solo formulaciones con carbidopa.",
+    ],
+    FENITOINA: [
+      "⚠️ MODERADA: El ácido fólico puede reducir niveles de fenitoína. Monitoree niveles del medicamento.",
+    ],
+  },
+  "Vitamina B12": {
+    METFORMINA: [
+      "💡 BENEFICIOSA: La metformina reduce absorción de B12. Se recomienda suplementación en uso prolongado.",
+    ],
+    ANTIACIDOS: [
+      "⚠️ MODERADA: Inhibidores de bomba de protones reducen absorción. Considere formas sublinguales o inyectables.",
     ],
   },
 }
@@ -1645,12 +1736,8 @@ export const verificarInteraccionesMedicamentos = (nombreSuplemento: string, med
     }
   }
 
-  // Verificación genérica para cualquier suplemento si no se definen interacciones específicas
-  if (interacciones.length === 0 && medicamentos.trim() !== "") {
-    interacciones.push(
-      "Consulta con un profesional de la salud sobre posibles interacciones con tus medicamentos actuales",
-    )
-  }
+  // NO añadir interacciones genéricas si no hay interacciones específicas conocidas
+  // Esto evita alarmar innecesariamente al usuario
 
   return interacciones
 }

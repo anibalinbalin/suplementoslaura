@@ -47,7 +47,7 @@ export default function GenderSelectionPage() {
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-8">
-        <Card className="max-w-md mx-auto">
+        <Card className="max-w-md mx-auto form-scale-in card-transition">
           <CardHeader>
             <CardTitle className="text-2xl text-center text-teal-800">¿Cuál es tu género?</CardTitle>
             <CardDescription className="text-center">
@@ -91,7 +91,7 @@ export default function GenderSelectionPage() {
                 </div>
               </RadioGroup>
 
-              <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 flex items-center justify-center">
+              <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 flex items-center justify-center button-transition">
                 Continuar
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -106,7 +106,7 @@ export default function GenderSelectionPage() {
       </main>
 
       <footer className="py-4 text-center text-sm text-gray-600">
-        <p>Suplementos Uruguay &copy; {new Date().getFullYear()} - Todos los derechos reservados</p>
+        <p>Suplementos+ &copy; {new Date().getFullYear()} - Todos los derechos reservados</p>
       </footer>
     </div>
   )
