@@ -140,7 +140,7 @@ export default function PrivacyPolicyPage() {
                     <span className="text-teal-600 mr-2">•</span>
                     <div>
                       <strong>Eliminar:</strong> Borrar todos tus datos permanentemente usando el botón 
-                      "Comenzar de nuevo" en la página de recomendaciones
+                      &quot;Comenzar de nuevo&quot; en la página de recomendaciones
                     </div>
                   </li>
                 </ul>

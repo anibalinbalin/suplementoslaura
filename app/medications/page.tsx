@@ -1,20 +1,17 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, ArrowRight, AlertCircle } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { ArrowLeft, ArrowRight, Pill, AlertCircle, Shield } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { useUser } from "@/context/user-context"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/lib/toast"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function MedicationsPage() {
   const router = useRouter()
@@ -52,98 +49,159 @@ export default function MedicationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-teal-50 flex flex-col">
-      <header className="container mx-auto py-6 px-4">
-        <div className="flex justify-between items-center">
-          <Link href="/age-selection" className="inline-flex items-center text-teal-700 hover:text-teal-800">
+    <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white flex flex-col">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center justify-between px-4">
+          <Link
+            href="/age-selection"
+            className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver a selección de edad
+            Atrás
           </Link>
-          <div className="text-sm text-gray-600">Paso 3 de 6</div>
-        </div>
-        <div className="mt-4">
-          <Progress value={50} className="h-2 bg-teal-100" />
+          <div className="text-sm font-medium text-muted-foreground">
+            Paso 3 de 5
+          </div>
         </div>
       </header>
 
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <Card className="max-w-2xl mx-auto form-scale-in card-transition">
-          <CardHeader>
-            <CardTitle className="text-2xl text-center text-teal-800">Información sobre medicamentos</CardTitle>
-            <CardDescription className="text-center">
-              Esta información es importante para evitar posibles interacciones entre suplementos y medicamentos
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Alert className="mb-6">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Importante</AlertTitle>
-              <AlertDescription>
-                Algunos suplementos pueden interactuar con medicamentos. Esta información nos ayuda a brindarte
-                recomendaciones más seguras, pero siempre consulta con un profesional de la salud antes de comenzar
-                cualquier régimen de suplementos.
-              </AlertDescription>
-            </Alert>
+      {/* Progress Bar */}
+      <div className="w-full bg-background/50 px-4">
+        <div className="container">
+          <Progress value={60} className="h-1" />
+        </div>
+      </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-700">¿Estás tomando algún medicamento actualmente?</h3>
+      {/* Main Content */}
+      <main className="flex-1 container mx-auto px-4 py-12 md:py-20">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-10 space-y-4 fade-in">
+            <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-amber-500/10 mb-2">
+              <Pill className="h-7 w-7 text-amber-600" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-display">
+              Información sobre medicamentos
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Ayúdanos a evitar posibles interacciones entre suplementos y medicamentos
+            </p>
+          </div>
 
-                <RadioGroup value={takingMeds} onValueChange={setTakingMeds} className="grid grid-cols-2 gap-4">
-                  <div className="relative">
-                    <RadioGroupItem value="yes" id="yes" className="peer sr-only" />
-                    <Label
-                      htmlFor="yes"
-                      className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-teal-600 peer-data-[state=checked]:bg-teal-50 [&:has([data-state=checked])]:border-primary cursor-pointer selection-transition"
-                    >
-                      <span className="font-medium">Sí</span>
-                    </Label>
+          {/* Important Notice */}
+          <div className="mb-8 animate-in">
+            <div className="rounded-xl border-2 border-amber-500/20 bg-amber-500/5 p-6">
+              <div className="flex gap-4">
+                <div className="flex-shrink-0">
+                  <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                    <Shield className="h-5 w-5 text-amber-600" />
                   </div>
-
-                  <div className="relative">
-                    <RadioGroupItem value="no" id="no" className="peer sr-only" />
-                    <Label
-                      htmlFor="no"
-                      className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-teal-600 peer-data-[state=checked]:bg-teal-50 [&:has([data-state=checked])]:border-primary cursor-pointer selection-transition"
-                    >
-                      <span className="font-medium">No</span>
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              {takingMeds === "yes" && (
-                <div className="space-y-2">
-                  <Label htmlFor="medications">Por favor, lista los medicamentos que estás tomando actualmente:</Label>
-                  <Textarea
-                    id="medications"
-                    placeholder="Ejemplo: Atorvastatina 20mg, Levotiroxina 50mcg, etc."
-                    value={medsDetails}
-                    onChange={(e) => setMedsDetails(e.target.value)}
-                    className="min-h-[100px] input-transition"
-                  />
-                  <p className="text-sm text-gray-500">
-                    Incluye el nombre y la dosis de cada medicamento si la conoces.
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold text-amber-900 mb-2">Tu seguridad es nuestra prioridad</h3>
+                  <p className="text-sm text-amber-800 leading-relaxed">
+                    Algunos suplementos pueden interactuar con medicamentos. Esta información nos ayuda a brindarte
+                    recomendaciones más seguras, pero siempre consulta con un profesional de la salud antes de comenzar
+                    cualquier régimen de suplementos.
                   </p>
                 </div>
-              )}
+              </div>
+            </div>
+          </div>
 
-              <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 flex items-center justify-center button-transition">
-                Continuar
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </form>
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <p className="text-sm text-gray-600">
-              Esta información se mantiene privada y solo se utiliza para generar recomendaciones más seguras.
-            </p>
-          </CardFooter>
-        </Card>
+          <Card className="animate-in border-border/50">
+            <CardContent className="pt-8">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Yes/No Selection */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">¿Estás tomando algún medicamento actualmente?</h3>
+
+                  <RadioGroup value={takingMeds} onValueChange={setTakingMeds} className="grid grid-cols-2 gap-4">
+                    <div className="relative">
+                      <RadioGroupItem value="yes" id="yes" className="peer sr-only" />
+                      <Label
+                        htmlFor="yes"
+                        className="flex items-center justify-center rounded-xl border-2 border-border/50 bg-background p-6 hover:bg-accent/50 hover:border-accent transition-all duration-200 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 peer-data-[state=checked]:ring-4 peer-data-[state=checked]:ring-primary/10 cursor-pointer"
+                      >
+                        <span className="text-base font-medium">Sí</span>
+                      </Label>
+                    </div>
+
+                    <div className="relative">
+                      <RadioGroupItem value="no" id="no" className="peer sr-only" />
+                      <Label
+                        htmlFor="no"
+                        className="flex items-center justify-center rounded-xl border-2 border-border/50 bg-background p-6 hover:bg-accent/50 hover:border-accent transition-all duration-200 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 peer-data-[state=checked]:ring-4 peer-data-[state=checked]:ring-primary/10 cursor-pointer"
+                      >
+                        <span className="text-base font-medium">No</span>
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                {/* Medication Details (shown if Yes) */}
+                {takingMeds === "yes" && (
+                  <div className="space-y-4 slide-in-from-bottom">
+                    <div className="space-y-2">
+                      <Label htmlFor="medications" className="text-base font-medium">
+                        Por favor, lista los medicamentos que estás tomando
+                      </Label>
+                      <Textarea
+                        id="medications"
+                        placeholder="Ejemplo: Atorvastatina 20mg, Levotiroxina 50mcg, Metformina 500mg..."
+                        value={medsDetails}
+                        onChange={(e) => setMedsDetails(e.target.value)}
+                        className="min-h-[140px] resize-none"
+                        autoFocus
+                      />
+                      <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <p>
+                          Incluye el nombre y la dosis de cada medicamento si la conoces. Esto nos ayuda a
+                          identificar posibles interacciones.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                  <Link href="/age-selection" className="flex-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="lg"
+                      className="w-full"
+                    >
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Atrás
+                    </Button>
+                  </Link>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="flex-1 group"
+                  >
+                    Continuar
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+            <div className="px-8 pb-8">
+              <p className="text-xs text-center text-muted-foreground">
+                Tu información médica se mantiene privada y segura
+              </p>
+            </div>
+          </Card>
+        </div>
       </main>
 
-      <footer className="py-4 text-center text-sm text-gray-600">
-        <p>Suplementos+ &copy; {new Date().getFullYear()} - Todos los derechos reservados</p>
+      {/* Footer */}
+      <footer className="py-6 text-center border-t border-border/40">
+        <p className="text-sm text-muted-foreground">
+          Suplementos+ &copy; {new Date().getFullYear()}
+        </p>
       </footer>
     </div>
   )

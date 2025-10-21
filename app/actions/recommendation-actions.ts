@@ -2,6 +2,9 @@
 import { suplementosExamine } from "@/lib/examine-data-es"
 import { generarRecomendaciones } from "@/lib/recommendation-service"
 import type { BloodTestResult } from "@/lib/blood-markers"
+import { validateRecommendationList } from "@/lib/safety-validator"
+import { generateFullDisclaimer } from "@/lib/disclaimer-generator"
+import type { SafetyWarning } from "@/lib/clinical-safety"
 
 interface RecommendationRequest {
   gender: "male" | "female"
@@ -36,6 +39,10 @@ interface SupplementRecommendation {
     precio?: number
     disponible?: boolean
   }>
+  // NEW: Clinical safety features
+  safetyWarnings?: SafetyWarning[]
+  requiresProfessionalReview?: boolean
+  recommendedForm?: string
 }
 
 interface RecommendationResponse {
@@ -44,6 +51,16 @@ interface RecommendationResponse {
   error?: string
   source?: string
   modelUsed?: string
+  // NEW: Clinical safety disclaimers
+  clinicalDisclaimer?: {
+    level: 'STANDARD' | 'ENHANCED' | 'CRITICAL'
+    primaryDisclaimer: string
+    specificWarnings: string[]
+    actionRequired?: string
+    professionalConsultRequired: boolean
+  }
+  drugDepletionWarnings?: SafetyWarning[]
+  overallRequiresProfessionalReview?: boolean
 }
 
 /**
@@ -106,11 +123,65 @@ export async function getAIRecommendations(request: RecommendationRequest): Prom
       productosMercadoLibre: rec.productosMercadoLibre,
     }))
 
+    // ============================================================================
+    // NEW: CLINICAL SAFETY VALIDATION
+    // ============================================================================
+
+    // Prepare patient context for safety validation
+    const patientContext = {
+      age: request.age || undefined,
+      gender: request.gender === 'male' ? 'hombre' as const : 'mujer' as const,
+      isPregnant: undefined, // Unknown - survey doesn't capture this yet
+      isBreastfeeding: undefined, // Unknown - survey doesn't capture this yet
+      conditions: undefined, // Unknown - will be extracted from health goals in future
+      medications: request.medications ? request.medications.split(',').map(m => m.trim()) : [],
+    }
+
+    // Validate all supplements
+    const supplementList = recommendations.map(rec => ({
+      name: rec.name,
+      dosage: rec.dosage,
+    }))
+
+    const validationResults = validateRecommendationList(supplementList, patientContext)
+
+    // Add safety warnings to each recommendation
+    recommendations.forEach((rec, index) => {
+      const validation = validationResults.supplementValidations[index]
+      if (validation) {
+        rec.safetyWarnings = validation.warnings
+        rec.requiresProfessionalReview = validation.requiresProfessionalReview
+
+        // Extract recommended form from warnings
+        const formWarning = validation.warnings.find(w => w.category === 'QUALITY')
+        if (formWarning) {
+          rec.recommendedForm = formWarning.message
+        }
+
+        // Add critical warnings to the main warnings array
+        const criticalWarnings = validation.warnings
+          .filter(w => w.severity === 'CRITICAL' || w.severity === 'MAJOR')
+          .map(w => `${w.severity}: ${w.message}`)
+
+        if (criticalWarnings.length > 0) {
+          rec.warnings = [...(rec.warnings || []), ...criticalWarnings]
+          rec.consultNutritionist = true
+        }
+      }
+    })
+
+    // Generate overall disclaimer
+    const allWarnings = validationResults.supplementValidations.flatMap(v => v.warnings)
+    const disclaimer = generateFullDisclaimer(allWarnings, patientContext)
+
     return {
       success: true,
       recommendations,
       source: "Basado en evidencia científica y análisis de sangre",
-      modelUsed: "Sistema de recomendación integrado",
+      modelUsed: "Sistema de recomendación integrado con validación clínica",
+      clinicalDisclaimer: disclaimer,
+      drugDepletionWarnings: validationResults.drugDepletionWarnings,
+      overallRequiresProfessionalReview: validationResults.overallRequiresProfessionalReview,
     }
   } catch (error: any) {
     console.error("Error in getAIRecommendations:", error)
@@ -209,7 +280,7 @@ export async function getFallbackRecommendations(request: RecommendationRequest)
     }
 
     // Convert to the expected format
-    const recommendations = uniqueSupplements.map((supplement) => {
+    const recommendations: SupplementRecommendation[] = uniqueSupplements.map((supplement) => {
       // Check for medication interactions
       const interactions = checkMedicationInteractions(supplement.nombre, request.medications || "")
       // Check for age-specific warnings
@@ -244,11 +315,65 @@ export async function getFallbackRecommendations(request: RecommendationRequest)
       }
     })
 
+    // ============================================================================
+    // CLINICAL SAFETY VALIDATION (same as primary flow)
+    // ============================================================================
+
+    // Prepare patient context for safety validation
+    const patientContext = {
+      age: request.age || undefined,
+      gender: request.gender === 'male' ? 'hombre' as const : 'mujer' as const,
+      isPregnant: undefined, // Unknown - survey doesn't capture this yet
+      isBreastfeeding: undefined, // Unknown - survey doesn't capture this yet
+      conditions: undefined, // Unknown - will be extracted from health goals in future
+      medications: request.medications ? request.medications.split(',').map(m => m.trim()) : [],
+    }
+
+    // Validate all supplements
+    const supplementList = recommendations.map(rec => ({
+      name: rec.name,
+      dosage: rec.dosage,
+    }))
+
+    const validationResults = validateRecommendationList(supplementList, patientContext)
+
+    // Add safety warnings to each recommendation
+    recommendations.forEach((rec, index) => {
+      const validation = validationResults.supplementValidations[index]
+      if (validation) {
+        rec.safetyWarnings = validation.warnings
+        rec.requiresProfessionalReview = validation.requiresProfessionalReview
+
+        // Extract recommended form from warnings
+        const formWarning = validation.warnings.find(w => w.category === 'QUALITY')
+        if (formWarning) {
+          rec.recommendedForm = formWarning.message
+        }
+
+        // Add critical warnings to the main warnings array
+        const criticalWarnings = validation.warnings
+          .filter(w => w.severity === 'CRITICAL' || w.severity === 'MAJOR')
+          .map(w => `${w.severity}: ${w.message}`)
+
+        if (criticalWarnings.length > 0) {
+          rec.warnings = [...(rec.warnings || []), ...criticalWarnings]
+          rec.consultNutritionist = true
+        }
+      }
+    })
+
+    // Generate overall disclaimer
+    const allWarnings = validationResults.supplementValidations.flatMap(v => v.warnings)
+    const disclaimer = generateFullDisclaimer(allWarnings, patientContext)
+
     return {
       success: true,
       recommendations,
       source: "Basado en evidencia científica",
-      modelUsed: "análisis de datos científicos",
+      modelUsed: "análisis de datos científicos con validación clínica",
+      clinicalDisclaimer: disclaimer,
+      drugDepletionWarnings: validationResults.drugDepletionWarnings,
+      overallRequiresProfessionalReview: validationResults.overallRequiresProfessionalReview,
     }
   } catch (error) {
     console.error("Error in getFallbackRecommendations:", error)

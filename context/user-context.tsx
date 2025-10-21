@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import type { SupplementRecommendation } from "@/lib/gemini-service"
 import type { BloodTestResult } from "@/lib/blood-markers"
+import type { SafetyWarning } from "@/lib/clinical-safety"
 import { secureStorage, needsMigration } from "@/lib/crypto-storage"
 
 interface UserProfile {
@@ -15,6 +16,16 @@ interface UserProfile {
   recommendations: SupplementRecommendation[]
   bloodTestResults: BloodTestResult[]
   bloodTestDate: string | null
+  // Clinical safety fields
+  clinicalDisclaimer?: {
+    level: 'STANDARD' | 'ENHANCED' | 'CRITICAL'
+    primaryDisclaimer: string
+    specificWarnings: string[]
+    actionRequired?: string
+    professionalConsultRequired: boolean
+  }
+  drugDepletionWarnings?: SafetyWarning[]
+  overallRequiresProfessionalReview?: boolean
 }
 
 interface UserContextType {
@@ -27,6 +38,11 @@ interface UserContextType {
   setMedications: (medications: string) => void
   setRecommendations: (recommendations: SupplementRecommendation[]) => void
   setBloodTestResults: (results: BloodTestResult[], date?: string) => void
+  setClinicalSafetyData: (data: {
+    clinicalDisclaimer?: UserProfile['clinicalDisclaimer']
+    drugDepletionWarnings?: SafetyWarning[]
+    overallRequiresProfessionalReview?: boolean
+  }) => void
   resetProfile: () => void
 }
 
@@ -110,10 +126,23 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }
 
   const setBloodTestResults = (results: BloodTestResult[], date?: string) => {
-    setUserProfile((prev) => ({ 
-      ...prev, 
+    setUserProfile((prev) => ({
+      ...prev,
       bloodTestResults: results,
       bloodTestDate: date || new Date().toISOString().split('T')[0]
+    }))
+  }
+
+  const setClinicalSafetyData = (data: {
+    clinicalDisclaimer?: UserProfile['clinicalDisclaimer']
+    drugDepletionWarnings?: SafetyWarning[]
+    overallRequiresProfessionalReview?: boolean
+  }) => {
+    setUserProfile((prev) => ({
+      ...prev,
+      clinicalDisclaimer: data.clinicalDisclaimer,
+      drugDepletionWarnings: data.drugDepletionWarnings,
+      overallRequiresProfessionalReview: data.overallRequiresProfessionalReview,
     }))
   }
 
@@ -136,6 +165,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setMedications,
         setRecommendations,
         setBloodTestResults,
+        setClinicalSafetyData,
         resetProfile,
       }}
     >

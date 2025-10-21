@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "skill-seeker": {
+      "command": "python3",
+      "args": [
+        "/Users/anibalin/Sites/2025/skill_seekers/Skill_Seekers/mcp/server.py"
+      ],
+      "cwd": "/Users/anibalin/Sites/2025/skill_seekers/Skill_Seekers"
+    }
+  }
+}

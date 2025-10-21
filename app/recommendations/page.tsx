@@ -40,6 +40,7 @@ import type { CombinacionSuplementos } from "@/lib/recommendation-service"
 import { suplementosExamine } from "@/lib/examine-data-es"
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure"
 import { MedicationInteractionWarning } from "@/components/medication-interaction-warning"
+import { ClinicalDisclaimer, ClinicalSafetyWarnings, DrugDepletionWarnings } from "@/components/clinical-safety-warnings"
 import { toast } from "@/lib/toast"
 import { exportRecommendationsToPDF } from "@/lib/export-pdf"
 
@@ -53,19 +54,19 @@ function SupplementDetails({ supplement, gender, age }: {
 
   return (
     <div className="mt-4 space-y-4 w-full">
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h4 className="font-medium text-gray-800 mb-2">Información Científica</h4>
+      <div className="bg-muted/50 p-5 rounded-xl border border-border/50">
+        <h4 className="font-semibold text-foreground mb-3">Información Científica</h4>
         <div className="space-y-2">
           {supplement.scientificEvidence?.map((evidence: string, idx: number) => (
-            <p key={idx} className="text-sm text-gray-600">• {evidence}</p>
+            <p key={idx} className="text-sm text-muted-foreground leading-relaxed">• {evidence}</p>
           ))}
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <h4 className="font-medium text-blue-800 mb-2">Dosificación</h4>
-          <p className="text-sm text-blue-700">{supplement.dosage}</p>
+        <div className="bg-primary/5 p-5 rounded-xl border border-primary/10">
+          <h4 className="font-semibold text-primary mb-2">Dosificación</h4>
+          <p className="text-sm text-foreground/80">{supplement.dosage}</p>
           {supplement.genderSpecificDosage && (
             <p className="text-sm text-blue-600 mt-2">
               {gender === "male" ? "Hombres" : "Mujeres"}: {
@@ -77,39 +78,39 @@ function SupplementDetails({ supplement, gender, age }: {
           )}
         </div>
 
-        <div className="bg-green-50 p-4 rounded-lg">
-          <h4 className="font-medium text-green-800 mb-2">Mejor Momento</h4>
-          <p className="text-sm text-green-700">{supplement.optimalTime}</p>
+        <div className="bg-emerald-500/5 p-5 rounded-xl border border-emerald-500/10">
+          <h4 className="font-semibold text-emerald-700 mb-2">Mejor Momento</h4>
+          <p className="text-sm text-foreground/80">{supplement.optimalTime}</p>
         </div>
       </div>
 
       {supplement.absorptionTips && (
-        <div className="bg-yellow-50 p-4 rounded-lg">
-          <h4 className="font-medium text-yellow-800 mb-2">Consejos de Absorción</h4>
-          <p className="text-sm text-yellow-700">{supplement.absorptionTips}</p>
+        <div className="bg-amber-500/5 p-5 rounded-xl border border-amber-500/10">
+          <h4 className="font-semibold text-amber-700 mb-2">Consejos de Absorción</h4>
+          <p className="text-sm text-foreground/80">{supplement.absorptionTips}</p>
         </div>
       )}
 
       {supplement.warnings && supplement.warnings.length > 0 && (
-        <div className="bg-red-50 p-4 rounded-lg">
-          <h4 className="font-medium text-red-800 mb-2 flex items-center">
+        <div className="bg-destructive/5 p-5 rounded-xl border border-destructive/10">
+          <h4 className="font-semibold text-destructive mb-2 flex items-center">
             <AlertTriangle className="h-4 w-4 mr-2" />
             Advertencias
           </h4>
           <ul className="space-y-1">
             {supplement.warnings.map((warning: string, idx: number) => (
-              <li key={idx} className="text-sm text-red-700">• {warning}</li>
+              <li key={idx} className="text-sm text-foreground/80">• {warning}</li>
             ))}
           </ul>
         </div>
       )}
 
       {supplement.medicationInteractions && supplement.medicationInteractions.length > 0 && (
-        <div className="bg-orange-50 p-4 rounded-lg">
-          <h4 className="font-medium text-orange-800 mb-2">Interacciones con Medicamentos</h4>
+        <div className="bg-amber-600/5 p-5 rounded-xl border border-amber-600/10">
+          <h4 className="font-semibold text-amber-800 mb-2">Interacciones con Medicamentos</h4>
           <ul className="space-y-1">
             {supplement.medicationInteractions.map((interaction: string, idx: number) => (
-              <li key={idx} className="text-sm text-orange-700">• {interaction}</li>
+              <li key={idx} className="text-sm text-foreground/80">• {interaction}</li>
             ))}
           </ul>
         </div>
@@ -608,6 +609,7 @@ export default function RecommendationsPage() {
       setCombinaciones([defaultPack])
       setActiveCombination(defaultPack.id)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userProfile])
 
   // Función auxiliar para generar instrucciones personalizadas
@@ -823,6 +825,8 @@ export default function RecommendationsPage() {
       "Ashwagandha",
       "Beta-Alanine",
       "Beta-Alanina",
+      "Hierro",
+      "Iron",
     ]
 
     return suplementosConDescanso.includes(name)
@@ -1133,6 +1137,10 @@ export default function RecommendationsPage() {
         "Tomar diariamente durante 12 semanas, seguido de un descanso de 2-4 semanas. Los ciclos son opcionales pero recomendados para evaluar si se mantienen los beneficios sin suplementación continua.",
       Ashwagandha:
         "Tomar durante 3 meses, seguido de un descanso de 2-4 semanas para evitar la posible adaptación del cuerpo y mantener la efectividad del suplemento.",
+      Hierro:
+        "Tomar durante 3 meses para corregir deficiencia, luego reevaluar con análisis de sangre. El exceso de hierro puede ser perjudicial, por lo que es importante no tomarlo continuamente sin supervisión médica.",
+      Iron:
+        "Tomar durante 3 meses para corregir deficiencia, luego reevaluar con análisis de sangre. El exceso de hierro puede ser perjudicial, por lo que es importante no tomarlo continuamente sin supervisión médica.",
     }
 
     const info = informacionDescanso[name] || "No se requieren periodos de descanso específicos"
@@ -1184,19 +1192,19 @@ export default function RecommendationsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-green-50 to-teal-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-teal-600 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando tus recomendaciones...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Cargando tus recomendaciones...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-teal-50 flex flex-col">
-      <header className="container mx-auto py-6 px-4">
-        <div className="flex justify-between items-center">
+    <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white flex flex-col">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center justify-between px-4">
           <Link href="/dietary-restrictions" className="inline-flex items-center text-teal-700 hover:text-teal-800">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Volver a restricciones
@@ -1245,7 +1253,21 @@ export default function RecommendationsPage() {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
           <h1 className="text-3xl font-bold text-teal-800 mb-2 text-center">Tus Recomendaciones Personalizadas</h1>
-          
+
+          {/* Clinical Disclaimer - if available */}
+          {userProfile?.clinicalDisclaimer && (
+            <div className="mb-6">
+              <ClinicalDisclaimer disclaimer={userProfile.clinicalDisclaimer} />
+            </div>
+          )}
+
+          {/* Drug Depletion Warnings - if available */}
+          {userProfile?.drugDepletionWarnings && userProfile.drugDepletionWarnings.length > 0 && (
+            <div className="mb-6">
+              <DrugDepletionWarnings warnings={userProfile.drugDepletionWarnings} />
+            </div>
+          )}
+
           {/* Mostrar advertencias de interacciones medicamentosas si existen */}
           {userProfile?.medications && supplements && (() => {
             const allInteractions = supplements
@@ -1473,6 +1495,17 @@ export default function RecommendationsPage() {
                             <p className="text-sm text-blue-700">{obtenerInfoPeriodoDescanso(supplement.nombre)}</p>
                           </div>
                         )}
+
+                        {/* Clinical Safety Warnings - if available */}
+                        {(() => {
+                          const recommendation = userProfile?.recommendations?.find((rec) => rec.name === supplement.nombre)
+                          return recommendation?.safetyWarnings && recommendation.safetyWarnings.length > 0 ? (
+                            <ClinicalSafetyWarnings
+                              warnings={recommendation.safetyWarnings}
+                              supplementName={traducirNombre(supplement.nombre)}
+                            />
+                          ) : null
+                        })()}
                       </CardContent>
                       <CardFooter className="flex flex-col items-start">
                         <h4 className="font-medium text-gray-700 mb-2">Disponible en:</h4>
@@ -1661,6 +1694,17 @@ export default function RecommendationsPage() {
                                   <p className="text-sm text-blue-700">{obtenerInfoPeriodoDescanso(supplement.nombre)}</p>
                                 </div>
                               )}
+
+                              {/* Clinical Safety Warnings - if available */}
+                              {(() => {
+                                const recommendation = userProfile?.recommendations?.find((rec) => rec.name === supplement.nombre)
+                                return recommendation?.safetyWarnings && recommendation.safetyWarnings.length > 0 ? (
+                                  <ClinicalSafetyWarnings
+                                    warnings={recommendation.safetyWarnings}
+                                    supplementName={traducirNombre(supplement.nombre)}
+                                  />
+                                ) : null
+                              })()}
                             </CardContent>
                             <CardFooter className="flex flex-col items-start">
                               <h4 className="font-medium text-gray-700 mb-2">Disponible en:</h4>
@@ -1757,25 +1801,84 @@ export default function RecommendationsPage() {
                       </h3>
 
                       <div className="space-y-4">
-                        {/* Morning supplements - only show if there are morning supplements */}
+                        {/* Clasificar todos los suplementos por momento único */}
                         {(() => {
-                          // Usar la misma lógica de clasificación que el backend
-                          const suplementosMañana = combinaciones[0].suplementos.filter((s: any) => {
-                            const momento = s.momentoOptimo.toLowerCase()
-                            const nombre = s.nombre.toLowerCase()
-                            return (momento.includes("mañana") || momento.includes("desayuno") || 
-                                   momento.includes("ayunas") || nombre.includes("vitamina d")) &&
-                                   !momento.includes("noche") && !momento.includes("ejercicio")
+                          // Crear un set para rastrear suplementos ya mostrados
+                          const suplementosMostrados = new Set<string>()
+                          
+                          // Función para clasificar por momento
+                          const clasificarPorMomento = (suplemento: any) => {
+                            const momento = suplemento.momentoOptimo.toLowerCase()
+                            const nombre = suplemento.nombre.toLowerCase()
+                            
+                            // Prioridad 1: Ejercicio
+                            if (momento.includes("ejercicio") || nombre.includes("creatina") || nombre.includes("beta-alanina")) {
+                              return "ejercicio"
+                            }
+                            
+                            // Prioridad 2: Noche
+                            if (momento.includes("dormir") || momento.includes("acostarse") || 
+                                momento.includes("sueño") || nombre.includes("melatonina") || 
+                                (nombre.includes("magnesio") && momento.includes("noche"))) {
+                              return "noche"
+                            }
+                            
+                            // Prioridad 3: Vitaminas liposolubles con comidas
+                            if (nombre.includes("omega") || nombre.includes("vitamina e") || 
+                                nombre.includes("vitamina k") || nombre.includes("coq10") ||
+                                momento.includes("con grasa")) {
+                              return "con_comidas"
+                            }
+                            
+                            // Prioridad 4: Mañana
+                            if ((momento.includes("mañana") || momento.includes("desayuno") || momento.includes("ayunas")) &&
+                                !momento.includes("comida")) {
+                              if (nombre.includes("vitamina d") || nombre.includes("hierro") || 
+                                  nombre.includes("vitamina b") || nombre.includes("complejo b")) {
+                                return "mañana"
+                              }
+                            }
+                            
+                            // Prioridad 5: Con comidas
+                            if (momento.includes("comida") || momento.includes("alimento")) {
+                              return "con_comidas"
+                            }
+                            
+                            // Por defecto - asignar basado en el tipo de suplemento
+                            if (nombre.includes("calcio") || nombre.includes("zinc")) {
+                              return "con_comidas"
+                            }
+                            
+                            return "mañana"
+                          }
+                          
+                          // Clasificar todos los suplementos
+                          const suplementosClasificados: Record<string, any[]> = {
+                            mañana: [],
+                            con_comidas: [],
+                            ejercicio: [],
+                            noche: []
+                          }
+                          
+                          combinaciones[0].suplementos.forEach((sup: any) => {
+                            const momento = clasificarPorMomento(sup)
+                            if (!suplementosMostrados.has(sup.nombre)) {
+                              suplementosClasificados[momento].push(sup)
+                              suplementosMostrados.add(sup.nombre)
+                            }
                           })
                           
-                          return suplementosMañana.length > 0 && (
+                          return (
+                            <>
+                              {/* Morning supplements */}
+                              {suplementosClasificados.mañana.length > 0 && (
                           <div className="bg-amber-50 rounded-lg p-5 border border-amber-100">
                             <div className="flex items-center mb-3">
                               <Sun className="h-5 w-5 text-amber-500 mr-2" />
                               <h4 className="font-medium text-amber-800">Por la mañana</h4>
                             </div>
                             <div className="space-y-4">
-                              {suplementosMañana.map((suplemento, idx) => (
+                              {suplementosClasificados.mañana.map((suplemento, idx) => (
                                   <div key={idx} className="bg-white rounded-md p-4 shadow-sm">
                                     <div className="flex justify-between items-start">
                                       <div className="flex items-start">
@@ -1824,21 +1927,17 @@ export default function RecommendationsPage() {
                                 ))}
                             </div>
                           </div>
-                        )
-                        })()}
+                              )}
 
-                        {/* With meals supplements - only show if there are meal-related supplements */}
-                        {combinaciones[0].suplementos.filter((s: any) => s.momentoOptimo.toLowerCase().includes("comida"))
-                          .length > 0 && (
+                              {/* With meals supplements - only show if there are meal-related supplements */}
+                              {suplementosClasificados.con_comidas.length > 0 && (
                           <div className="bg-green-50 rounded-lg p-5 border border-green-100">
                             <div className="flex items-center mb-3">
                               <Utensils className="h-5 w-5 text-green-600 mr-2" />
                               <h4 className="font-medium text-green-800">Con las comidas</h4>
                             </div>
                             <div className="space-y-4">
-                              {combinaciones[0].suplementos
-                                .filter((s: any) => s.momentoOptimo.toLowerCase().includes("comida"))
-                                .map((suplemento, idx) => (
+                              {suplementosClasificados.con_comidas.map((suplemento, idx) => (
                                   <div key={idx} className="bg-white rounded-md p-4 shadow-sm">
                                     <div className="flex justify-between items-start">
                                       <div className="flex items-start">
@@ -1887,20 +1986,17 @@ export default function RecommendationsPage() {
                                 ))}
                             </div>
                           </div>
-                        )}
+                              )}
 
-                        {/* Exercise supplements - only show if there are exercise-related supplements */}
-                        {combinaciones[0].suplementos.filter((s: any) => s.momentoOptimo.toLowerCase().includes("ejercicio"))
-                          .length > 0 && (
+                              {/* Exercise supplements - only show if there are exercise-related supplements */}
+                              {suplementosClasificados.ejercicio.length > 0 && (
                           <div className="bg-red-50 rounded-lg p-5 border border-red-100">
                             <div className="flex items-center mb-3">
                               <Dumbbell className="h-5 w-5 text-red-500 mr-2" />
                               <h4 className="font-medium text-red-800">Para días de entrenamiento</h4>
                             </div>
                             <div className="space-y-4">
-                              {combinaciones[0].suplementos
-                                .filter((s: any) => s.momentoOptimo.toLowerCase().includes("ejercicio"))
-                                .map((suplemento, idx) => (
+                              {suplementosClasificados.ejercicio.map((suplemento, idx) => (
                                   <div key={idx} className="bg-white rounded-md p-4 shadow-sm">
                                     <div className="flex justify-between items-start">
                                       <div className="flex items-start">
@@ -1958,27 +2054,17 @@ export default function RecommendationsPage() {
                                 ))}
                             </div>
                           </div>
-                        )}
+                              )}
 
-                        {/* Evening supplements - only show if there are evening supplements */}
-                        {combinaciones[0].suplementos.filter(
-                          (s) =>
-                            s.momentoOptimo.toLowerCase().includes("noche") ||
-                            s.momentoOptimo.toLowerCase().includes("dormir"),
-                        ).length > 0 && (
+                              {/* Evening supplements - only show if there are evening supplements */}
+                              {suplementosClasificados.noche.length > 0 && (
                           <div className="bg-indigo-50 rounded-lg p-5 border border-indigo-100">
                             <div className="flex items-center mb-3">
                               <Moon className="h-5 w-5 text-indigo-500 mr-2" />
                               <h4 className="font-medium text-indigo-800">Por la noche</h4>
                             </div>
                             <div className="space-y-4">
-                              {combinaciones[0].suplementos
-                                .filter(
-                                  (s) =>
-                                    s.momentoOptimo.toLowerCase().includes("noche") ||
-                                    s.momentoOptimo.toLowerCase().includes("dormir"),
-                                )
-                                .map((suplemento, idx) => (
+                              {suplementosClasificados.noche.map((suplemento, idx) => (
                                   <div key={idx} className="bg-white rounded-md p-4 shadow-sm">
                                     <div className="flex justify-between items-start">
                                       <div className="flex items-start">
@@ -2027,86 +2113,10 @@ export default function RecommendationsPage() {
                                 ))}
                             </div>
                           </div>
-                        )}
-
-                        {/* Flexible timing supplements - for supplements that don't have a specific timing */}
-                        {combinaciones[0].suplementos.filter(
-                          (s) =>
-                            !s.momentoOptimo.toLowerCase().includes("mañana") &&
-                            !s.momentoOptimo.toLowerCase().includes("desayuno") &&
-                            !s.momentoOptimo.toLowerCase().includes("noche") &&
-                            !s.momentoOptimo.toLowerCase().includes("dormir") &&
-                            !s.momentoOptimo.toLowerCase().includes("comida") &&
-                            !s.momentoOptimo.toLowerCase().includes("ejercicio"),
-                        ).length > 0 && (
-                          <div className="bg-blue-50 rounded-lg p-5 border border-blue-100">
-                            <div className="flex items-center mb-3">
-                              <Calendar className="h-5 w-5 text-blue-500 mr-2" />
-                              <h4 className="font-medium text-blue-800">Timing flexible</h4>
-                            </div>
-                            <div className="space-y-4">
-                              {combinaciones[0].suplementos
-                                .filter(
-                                  (s) =>
-                                    !s.momentoOptimo.toLowerCase().includes("mañana") &&
-                                    !s.momentoOptimo.toLowerCase().includes("desayuno") &&
-                                    !s.momentoOptimo.toLowerCase().includes("noche") &&
-                                    !s.momentoOptimo.toLowerCase().includes("dormir") &&
-                                    !s.momentoOptimo.toLowerCase().includes("comida") &&
-                                    !s.momentoOptimo.toLowerCase().includes("ejercicio"),
-                                )
-                                .map((suplemento, idx) => (
-                                  <div key={idx} className="bg-white rounded-md p-4 shadow-sm">
-                                    <div className="flex justify-between items-start">
-                                      <div className="flex items-start">
-                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                                          <Calendar className="h-5 w-5 text-blue-600" />
-                                        </div>
-                                        <div>
-                                          <h5 className="font-medium text-gray-800">
-                                            {traducirNombre(suplemento.nombre)}
-                                          </h5>
-                                          <p className="text-sm text-gray-600 mt-1">
-                                            Tomar en cualquier momento del día -
-                                            <SupplementInfo>
-                                              {suplemento.dosificacion}
-                                            </SupplementInfo>
-                                          </p>
-                                        </div>
-                                      </div>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-gray-400 hover:text-teal-600"
-                                        onClick={() => toggleDetails(combinaciones[0].id, suplemento.nombre)}
-                                      >
-                                        {isExpanded(combinaciones[0].id, suplemento.nombre) ? (
-                                          <ChevronUp className="h-5 w-5" />
-                                        ) : (
-                                          <HelpCircle className="h-5 w-5" />
-                                        )}
-                                      </Button>
-                                    </div>
-
-                                    {isExpanded(combinaciones[0].id, suplemento.nombre) && (
-                                      <div className="mt-3 pt-3 border-t text-sm">
-                                        <p className="text-gray-700 mb-2">
-                                          <span className="font-medium">¿Por qué timing flexible?</span> Este suplemento
-                                          puede tomarse en cualquier momento del día sin afectar significativamente su
-                                          eficacia. Puedes adaptarlo a tu rutina diaria según te resulte más
-                                          conveniente.
-                                        </p>
-                                        <p className="text-gray-700">
-                                          <span className="font-medium">Consejo de absorción:</span>{" "}
-                                          {getAbsorptionTips(suplemento)}
-                                        </p>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                            </div>
-                          </div>
-                        )}
+                              )}
+                            </>
+                          )
+                        })()}
                       </div>
                       
                       {/* Nota sobre la distribución optimizada */}

@@ -219,9 +219,9 @@ export default function AnalisisSangrePage() {
       ],
       'cortisol': [
         { min: 0, max: 5, status: 'Bajo', color: 'bg-red-500' },
-        { min: 5, max: 25, status: 'Normal', color: 'bg-green-500' },
-        { min: 25, max: 35, status: 'Elevado', color: 'bg-orange-500' },
-        { min: 35, max: 50, status: 'Muy elevado', color: 'bg-red-500' }
+        { min: 5, max: 15, status: 'Normal', color: 'bg-green-500' },
+        { min: 15, max: 25, status: 'Elevado - Estrés', color: 'bg-amber-500' },
+        { min: 25, max: 50, status: 'Muy elevado', color: 'bg-red-500' }
       ],
       'iron': [
         { min: 0, max: 60, status: 'Bajo', color: 'bg-red-500' },
@@ -889,8 +889,11 @@ export default function AnalisisSangrePage() {
                         className="w-full bg-teal-600 hover:bg-teal-700 text-white"
                         size="lg"
                       >
-                        Obtener Recomendaciones Personalizadas
+                        Continuar con Objetivos de Salud →
                       </Button>
+                      <p className="text-sm text-gray-600 text-center mt-2">
+                        A continuación, podrás seleccionar tus objetivos de salud para recibir recomendaciones personalizadas
+                      </p>
                       <div className="flex justify-center w-full">
                         <Button variant="outline" onClick={() => setActiveTab("input")}>
                           Volver a los datos

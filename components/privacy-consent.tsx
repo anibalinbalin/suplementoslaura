@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
-import { secureStorage } from "@/lib/crypto-storage"
+import { secureStorage, needsMigration } from "@/lib/crypto-storage"
 
 const CONSENT_KEY = "suplementos-uruguay-privacy-consent"
 
@@ -21,6 +21,11 @@ export function PrivacyConsent() {
   const [acceptTerms, setAcceptTerms] = useState(false)
 
   useEffect(() => {
+    // Migrar datos si es necesario
+    if (needsMigration(CONSENT_KEY)) {
+      secureStorage.migrateExistingData(CONSENT_KEY)
+    }
+    
     // Verificar si el usuario ya dio consentimiento
     const hasConsent = secureStorage.getItem(CONSENT_KEY)
     if (!hasConsent) {

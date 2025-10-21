@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 
 export default function GeneratingRecommendationsPage() {
   const router = useRouter()
-  const { userProfile, setRecommendations } = useUser()
+  const { userProfile, setRecommendations, setClinicalSafetyData } = useUser()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [progress, setProgress] = useState(0)
@@ -77,6 +77,13 @@ export default function GeneratingRecommendationsPage() {
           if (result.success && result.recommendations && result.recommendations.length > 0) {
             // Save recommendations to context
             setRecommendations(result.recommendations)
+
+            // Save clinical safety data to context
+            setClinicalSafetyData({
+              clinicalDisclaimer: result.clinicalDisclaimer,
+              drugDepletionWarnings: result.drugDepletionWarnings,
+              overallRequiresProfessionalReview: result.overallRequiresProfessionalReview,
+            })
 
             // Navigate to recommendations page
             setTimeout(() => {

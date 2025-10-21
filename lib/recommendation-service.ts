@@ -540,16 +540,39 @@ export async function generarRecomendaciones(solicitud: SolicitudRecomendacion):
         }
       }
 
+      // Determinar si este suplemento viene de una deficiencia detectada
+      let contextoDeficiencia = undefined
+      if (solicitud.bloodTestResults && solicitud.bloodTestResults.length > 0) {
+        const resultadoRelacionado = solicitud.bloodTestResults.find(result => {
+          const nombreSuplemento = suplemento.nombre.toLowerCase()
+          return (
+            (result.markerId === 'vitamin-d' && nombreSuplemento.includes('vitamina d')) ||
+            (result.markerId === 'vitamin-b12' && nombreSuplemento.includes('vitamina b12')) ||
+            (result.markerId === 'iron' && nombreSuplemento.includes('hierro')) ||
+            (result.markerId === 'magnesium' && nombreSuplemento.includes('magnesio')) ||
+            (result.markerId === 'calcium' && nombreSuplemento.includes('calcio'))
+          )
+        })
+        
+        if (resultadoRelacionado) {
+          contextoDeficiencia = {
+            tieneDeficiencia: true,
+            valorAnalisis: resultadoRelacionado.value,
+            edad: solicitud.edad || undefined
+          }
+        }
+      }
+
       return {
         nombre: suplemento.nombre,
         descripcion: descripcionFinal,
         beneficios: suplemento.beneficios,
-        dosificacion: extraerInfoDosificacion(suplemento, solicitud.genero),
+        dosificacion: extraerInfoDosificacion(suplemento, solicitud.genero, contextoDeficiencia),
         momentoOptimo: obtenerInfoMomentoOptimo(suplemento),
         consejosAbsorcion: obtenerInfoAbsorcion(suplemento),
         dosificacionEspecificaGenero: {
-          hombre: extraerInfoDosificacion(suplemento, "hombre"),
-          mujer: extraerInfoDosificacion(suplemento, "mujer"),
+          hombre: extraerInfoDosificacion(suplemento, "hombre", contextoDeficiencia),
+          mujer: extraerInfoDosificacion(suplemento, "mujer", contextoDeficiencia),
         },
         evidenciaCientifica: suplemento.evidencia_cientifica || [
           `${suplemento.nombre} ha mostrado beneficios para ${suplemento.beneficios[0].toLowerCase()} según la evidencia científica.`,
@@ -774,43 +797,104 @@ export function generarCombinacionesSinergicas(
 function distribuirSuplementosInteligentemente(momentos: Record<string, RecomendacionSuplemento[]>) {
   const MAX_POR_MOMENTO = 3 // Máximo de suplementos por momento del día
   
-  // Si la mañana está sobrecargada, mover algunos a con_comidas
-  if (momentos.mañana.length > MAX_POR_MOMENTO) {
-    const exceso = momentos.mañana.splice(MAX_POR_MOMENTO)
-    momentos.con_comidas.push(...exceso)
+  // Crear un conjunto para rastrear suplementos ya asignados
+  const suplementosAsignados = new Set<string>()
+  
+  // Primero, limpiar duplicados manteniendo el suplemento en su momento más apropiado
+  for (const [momento, suplementos] of Object.entries(momentos)) {
+    momentos[momento] = suplementos.filter(s => {
+      if (suplementosAsignados.has(s.nombre)) {
+        // Si ya está asignado, determinar cuál es el mejor momento
+        const momentoActual = momento
+        const mejorMomento = obtenerMejorMomento(s, momentoActual)
+        
+        // Si el momento actual no es el mejor, no incluirlo aquí
+        if (momentoActual !== mejorMomento) {
+          return false
+        }
+      }
+      suplementosAsignados.add(s.nombre)
+      return true
+    })
   }
   
-  // Si con_comidas está sobrecargado, distribuir algunos
-  if (momentos.con_comidas.length > MAX_POR_MOMENTO + 1) {
-    // Buscar vitaminas liposolubles para mantener con comidas
-    const vitaminasLiposolubles = momentos.con_comidas.filter(s => 
+  // Si la mañana está sobrecargada, mover algunos a con_comidas
+  if (momentos.mañana.length > MAX_POR_MOMENTO) {
+    // Priorizar mantener en la mañana: vitamina D, hierro (si no hay calcio), vitaminas B
+    const prioritariosMañana = momentos.mañana.filter(s => 
       s.nombre.toLowerCase().includes("vitamina d") ||
+      s.nombre.toLowerCase().includes("hierro") ||
+      s.nombre.toLowerCase().includes("vitamina b") ||
+      s.nombre.toLowerCase().includes("complejo b")
+    )
+    
+    const otros = momentos.mañana.filter(s => !prioritariosMañana.includes(s))
+    
+    // Mantener los prioritarios y mover el resto
+    momentos.mañana = [...prioritariosMañana.slice(0, MAX_POR_MOMENTO)]
+    
+    // Mover exceso a con_comidas, evitando duplicados
+    const exceso = [...prioritariosMañana.slice(MAX_POR_MOMENTO), ...otros]
+    exceso.forEach(s => {
+      if (!momentos.con_comidas.some(existing => existing.nombre === s.nombre)) {
+        momentos.con_comidas.push(s)
+      }
+    })
+  }
+  
+  // Si con_comidas está sobrecargado, redistribuir manteniendo vitaminas liposolubles
+  if (momentos.con_comidas.length > MAX_POR_MOMENTO + 1) {
+    // Vitaminas liposolubles DEBEN quedarse con comidas
+    const vitaminasLiposolubles = momentos.con_comidas.filter(s => 
       s.nombre.toLowerCase().includes("vitamina e") ||
       s.nombre.toLowerCase().includes("vitamina k") ||
-      s.nombre.toLowerCase().includes("omega")
+      s.nombre.toLowerCase().includes("omega") ||
+      s.nombre.toLowerCase().includes("coq10") ||
+      (s.nombre.toLowerCase().includes("vitamina d") && !momentos.mañana.some(m => m.nombre === s.nombre))
     )
     
-    const otros = momentos.con_comidas.filter(s => 
-      !vitaminasLiposolubles.includes(s)
-    )
+    const otros = momentos.con_comidas.filter(s => !vitaminasLiposolubles.includes(s))
     
     // Mantener las vitaminas liposolubles con comidas
-    momentos.con_comidas = vitaminasLiposolubles
+    momentos.con_comidas = vitaminasLiposolubles.slice(0, MAX_POR_MOMENTO + 1)
     
-    // Redistribuir otros
-    if (momentos.mañana.length < MAX_POR_MOMENTO && otros.length > 0) {
-      const paraManana = otros.splice(0, MAX_POR_MOMENTO - momentos.mañana.length)
-      momentos.mañana.push(...paraManana)
-    }
-    
-    // Si aún quedan, ponerlos en la tarde (crear nueva categoría si es necesario)
-    if (otros.length > 0) {
-      momentos.con_comidas.push(...otros.slice(0, 2)) // Máximo 2 más con comidas
-    }
+    // Si hay otros suplementos, considerar moverlos a otros momentos
+    otros.forEach(s => {
+      // Si puede ir en la noche y hay espacio, moverlo
+      if (s.nombre.toLowerCase().includes("magnesio") && (!momentos.noche || momentos.noche.length < 2)) {
+        if (!momentos.noche) momentos.noche = []
+        if (!momentos.noche.some(n => n.nombre === s.nombre)) {
+          momentos.noche.push(s)
+        }
+      }
+      // Si no, mantenerlo en con_comidas hasta el límite
+      else if (momentos.con_comidas.length < MAX_POR_MOMENTO + 2) {
+        if (!momentos.con_comidas.some(c => c.nombre === s.nombre)) {
+          momentos.con_comidas.push(s)
+        }
+      }
+    })
   }
   
   // Verificar interacciones negativas
   verificarYSepararInteracciones(momentos)
+}
+
+// Nueva función para determinar el mejor momento para un suplemento
+function obtenerMejorMomento(suplemento: RecomendacionSuplemento, momentoActual: string): string {
+  const nombre = suplemento.nombre.toLowerCase()
+  const momento = suplemento.momentoOptimo.toLowerCase()
+  
+  // Prioridades específicas
+  if (nombre.includes("vitamina d") && !momento.includes("noche")) return "mañana"
+  if (nombre.includes("hierro") && momento.includes("ayunas")) return "mañana"
+  if (nombre.includes("magnesio") && momento.includes("noche")) return "noche"
+  if (nombre.includes("melatonina")) return "noche"
+  if (nombre.includes("omega") || nombre.includes("vitamina e") || nombre.includes("vitamina k")) return "con_comidas"
+  if (momento.includes("ejercicio")) return momentoActual.includes("ejercicio") ? momentoActual : "ejercicio"
+  
+  // Por defecto, mantener en el momento actual
+  return momentoActual
 }
 
 // Función para separar suplementos que no deben tomarse juntos
@@ -851,32 +935,56 @@ function clasificarSuplementoPorMomento(suplemento: RecomendacionSuplemento): st
   // Prioridad 2: Suplementos específicos de sueño/noche
   if (momento.includes("dormir") || momento.includes("acostarse") || 
       momento.includes("sueño") || nombre.includes("melatonina") || 
-      (nombre.includes("magnesio") && momento.includes("noche"))) {
+      (nombre.includes("magnesio") && (momento.includes("noche") || momento.includes("dormir")))) {
     return "noche"
   }
   
-  // Prioridad 3: Suplementos de mañana
-  if (momento.includes("mañana") || momento.includes("desayuno") || 
-      momento.includes("ayunas") || nombre.includes("vitamina d")) {
-    return "mañana"
-  }
-  
-  // Prioridad 4: Si menciona "dividir dosis", asignar según el suplemento
-  if (momento.includes("dividir")) {
-    if (nombre.includes("magnesio") || nombre.includes("calcio")) {
-      return "con_comidas" // Mejor absorción con comidas
-    }
-    return "mañana" // Por defecto, empezar en la mañana
-  }
-  
-  // Prioridad 5: Con comidas
-  if (momento.includes("comida") || momento.includes("alimento") || 
-      momento.includes("grasa") || nombre.includes("omega") || 
-      nombre.includes("vitamina e") || nombre.includes("vitamina k")) {
+  // Prioridad 3: Suplementos que DEBEN ir con comidas (liposolubles)
+  if (nombre.includes("omega") || nombre.includes("vitamina e") || 
+      nombre.includes("vitamina k") || nombre.includes("coq10") ||
+      nombre.includes("coenzima q10") || momento.includes("con grasa")) {
     return "con_comidas"
   }
   
-  // Por defecto: con comidas para mejor absorción
+  // Prioridad 4: Suplementos de mañana (pero no duplicar si ya pueden ir con comidas)
+  if ((momento.includes("mañana") || momento.includes("desayuno") || momento.includes("ayunas")) &&
+      !momento.includes("comida")) {
+    // Vitamina D preferentemente en la mañana
+    if (nombre.includes("vitamina d")) return "mañana"
+    // Hierro en ayunas si es posible
+    if (nombre.includes("hierro") && momento.includes("ayunas")) return "mañana"
+    // Vitaminas B para energía
+    if (nombre.includes("vitamina b") || nombre.includes("complejo b")) return "mañana"
+    
+    return "mañana"
+  }
+  
+  // Prioridad 5: Si menciona "dividir dosis", determinar basado en el suplemento
+  if (momento.includes("dividir")) {
+    // Magnesio: si menciona sueño, parte en la noche
+    if (nombre.includes("magnesio")) {
+      return momento.includes("sueño") ? "noche" : "con_comidas"
+    }
+    // Calcio: mejor con comidas para absorción
+    if (nombre.includes("calcio")) {
+      return "con_comidas"
+    }
+    // Por defecto, distribuir con comidas
+    return "con_comidas"
+  }
+  
+  // Prioridad 6: Con comidas como opción general
+  if (momento.includes("comida") || momento.includes("alimento")) {
+    return "con_comidas"
+  }
+  
+  // Prioridad 7: Casos especiales basados en el nombre
+  // Ashwagandha: depende del efecto buscado
+  if (nombre.includes("ashwagandha")) {
+    return momento.includes("energía") ? "mañana" : "noche"
+  }
+  
+  // Por defecto: con comidas para mejor tolerancia
   return "con_comidas"
 }
 
@@ -985,7 +1093,7 @@ function generarInstruccionesEspecificas(suplementos: RecomendacionSuplemento[],
 
   // Añadir información sobre periodos de descanso si es necesario
   const suplementosConDescanso = suplementos.filter((s) =>
-    ["Creatina", "Beta-Alanina", "Ashwagandha"].includes(s.nombre),
+    ["Creatina", "Beta-Alanina", "Ashwagandha", "Hierro"].includes(s.nombre),
   )
 
   if (suplementosConDescanso.length > 0) {
@@ -1047,24 +1155,78 @@ function filtrarPorRestriccionesDietarias(
  * Extrae información de dosificación de un suplemento
  * @param suplemento Datos del suplemento
  * @param genero Género del usuario
+ * @param contexto Contexto adicional para personalizar la dosis
  * @returns Información de dosificación como string
  */
-function extraerInfoDosificacion(suplemento: DatosSuplemento, genero: "hombre" | "mujer"): string {
-  // Intentar obtener dosificación específica por género
-  if (suplemento.dosificacion) {
-    if (genero === "hombre" && suplemento.dosificacion.hombres) {
-      return suplemento.dosificacion.hombres
-    } else if (genero === "mujer" && suplemento.dosificacion.mujeres) {
-      return suplemento.dosificacion.mujeres
-    } else if (suplemento.dosificacion.general) {
-      return suplemento.dosificacion.general
+function extraerInfoDosificacion(
+  suplemento: DatosSuplemento, 
+  genero: "hombre" | "mujer",
+  contexto?: {
+    tieneDeficiencia?: boolean
+    valorAnalisis?: number
+    edad?: number
+    objetivo?: string
+  }
+): string {
+  const nombre = suplemento.nombre.toLowerCase()
+  
+  // Manejar casos específicos con contexto
+  if (contexto?.tieneDeficiencia) {
+    // Dosis específicas para deficiencias detectadas en análisis
+    if (nombre.includes("vitamina d")) {
+      if (contexto.valorAnalisis && contexto.valorAnalisis < 20) {
+        return "4,000 UI diarios (deficiencia severa detectada)"
+      } else if (contexto.valorAnalisis && contexto.valorAnalisis < 30) {
+        return "2,000-3,000 UI diarios (insuficiencia detectada)"
+      }
+    } else if (nombre.includes("vitamina b12")) {
+      if (contexto.valorAnalisis && contexto.valorAnalisis < 200) {
+        return "1,000-2,000 mcg diarios (deficiencia detectada)"
+      } else if (contexto.valorAnalisis && contexto.valorAnalisis < 300) {
+        return "500-1,000 mcg diarios (nivel subóptimo)"
+      }
+    } else if (nombre.includes("hierro")) {
+      return "50-100 mg de hierro elemental diarios (para corregir deficiencia)"
+    } else if (nombre.includes("magnesio")) {
+      return "400-600 mg diarios (para corregir deficiencia)"
     }
   }
-
+  
+  // Si hay dosificación específica en los datos, procesarla
+  if (suplemento.dosificacion) {
+    let dosisBase = ""
+    
+    if (genero === "hombre" && suplemento.dosificacion.hombres) {
+      dosisBase = suplemento.dosificacion.hombres
+    } else if (genero === "mujer" && suplemento.dosificacion.mujeres) {
+      dosisBase = suplemento.dosificacion.mujeres
+    } else if (suplemento.dosificacion.general) {
+      dosisBase = suplemento.dosificacion.general
+    }
+    
+    // Para suplementos con rangos, especificar cuándo usar cada extremo
+    if (dosisBase.includes("-") && !dosisBase.includes("mg)")) {
+      // Casos especiales donde el rango necesita explicación
+      if (nombre.includes("vitamina d") && dosisBase.includes("1,000-4,000")) {
+        return "1,000 UI diarios (mantenimiento) o hasta 4,000 UI (si hay deficiencia)"
+      } else if (nombre.includes("omega") && dosisBase.includes("1-3g")) {
+        return "1g diario (prevención) o hasta 3g (condiciones inflamatorias)"
+      } else if (nombre.includes("magnesio") && dosisBase.includes("200-400")) {
+        const dosisMg = genero === "hombre" ? "400-420mg" : "310-320mg"
+        return `${dosisMg} diarios (dosis menor si es primera vez)`
+      } else if (nombre.includes("zinc") && dosisBase.includes("15-30")) {
+        const dosisZn = genero === "hombre" ? "11-15mg" : "8-12mg"
+        return `${dosisZn} diarios (dosis mayor solo durante enfermedad)`
+      } else if (nombre.includes("creatina")) {
+        return genero === "hombre" ? "5g diarios" : "3-5g diarios"
+      }
+    }
+    
+    return dosisBase
+  }
+  
   // Si no hay información específica, proporcionar un mensaje genérico
-  return `Consulta con un profesional de la salud para la dosificación adecuada para ${
-    genero === "hombre" ? "hombres" : "mujeres"
-  }.`
+  return `Consulta con un profesional de la salud para la dosificación adecuada`
 }
 
 /**
@@ -1152,6 +1314,8 @@ function obtenerInfoPeriodoDescanso(nombre: string): string {
       "Tomar diariamente durante 12 semanas, seguido de un descanso de 2-4 semanas. Los ciclos son opcionales pero recomendados para evaluar si se mantienen los beneficios sin suplementación continua.",
     Ashwagandha:
       "Tomar durante 3 meses, seguido de un descanso de 2-4 semanas para evitar la posible adaptación del cuerpo y mantener la efectividad del suplemento.",
+    Hierro:
+      "Tomar durante 3 meses para corregir deficiencia, luego reevaluar con análisis de sangre. El exceso de hierro puede ser perjudicial, por lo que es importante no tomarlo continuamente sin supervisión médica.",
   }
 
   return informacionDescanso[nombre] || "No se requieren periodos de descanso específicos"

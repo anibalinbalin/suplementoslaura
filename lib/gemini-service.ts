@@ -1,6 +1,8 @@
 // Este archivo ya no se utiliza para generar recomendaciones
 // Todas las recomendaciones ahora provienen directamente de los datos de Examine
 
+import type { SafetyWarning } from './clinical-safety'
+
 export interface RecommendationRequest {
   gender: "male" | "female"
   age: number | null
@@ -34,6 +36,10 @@ export interface SupplementRecommendation {
     precio?: number
     disponible?: boolean
   }>
+  // Clinical safety features
+  safetyWarnings?: SafetyWarning[]
+  requiresProfessionalReview?: boolean
+  recommendedForm?: string
 }
 
 // Este archivo se mantiene solo para compatibilidad con tipos
