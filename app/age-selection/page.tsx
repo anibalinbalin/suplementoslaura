@@ -1,13 +1,11 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, ArrowRight } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ArrowLeft, ArrowRight, Calendar } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { useUser } from "@/context/user-context"
 import { Input } from "@/components/ui/input"
@@ -49,78 +47,124 @@ export default function AgeSelectionPage() {
       return
     }
 
-    console.log("Guardando edad:", parsedAge)
     setAge(parsedAge)
     toast.success("Edad guardada correctamente")
     router.push("/medications")
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-teal-50 flex flex-col">
-      <header className="container mx-auto py-6 px-4">
-        <div className="flex justify-between items-center">
-          <Link href="/gender-selection" className="inline-flex items-center text-teal-700 hover:text-teal-800">
+    <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white flex flex-col">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center justify-between px-4">
+          <Link
+            href="/gender-selection"
+            className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver a selección de género
+            Atrás
           </Link>
-          <div className="text-sm text-gray-600">Paso 2 de 6</div>
-        </div>
-        <div className="mt-4">
-          <Progress value={33} className="h-2 bg-teal-100" />
+          <div className="text-sm font-medium text-muted-foreground">
+            Paso 2 de 5
+          </div>
         </div>
       </header>
 
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <Card className="max-w-md mx-auto form-scale-in card-transition">
-          <CardHeader>
-            <CardTitle className="text-2xl text-center text-teal-800">¿Cuál es tu edad?</CardTitle>
-            <CardDescription className="text-center">
-              Esta información nos ayuda a personalizar tus recomendaciones de suplementos según tu etapa de vida
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">{error}</div>
-              )}
+      {/* Progress Bar */}
+      <div className="w-full bg-background/50 px-4">
+        <div className="container">
+          <Progress value={40} className="h-1" />
+        </div>
+      </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="age">Edad (años)</Label>
-                <Input
-                  id="age"
-                  type="number"
-                  min="18"
-                  max="100"
-                  placeholder="Ingresa tu edad"
-                  value={ageValue}
-                  onChange={(e) => {
-                    const value = e.target.value
-                    // Solo permitir números y limitar a 3 dígitos
-                    if (value === "" || (/^\d+$/.test(value) && value.length <= 3)) {
-                      setAgeValue(value)
-                      setError("")
-                    }
-                  }}
-                  className={`input-transition ${error ? "border-red-500" : ""}`}
-                />
-              </div>
-
-              <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 flex items-center justify-center button-transition">
-                Continuar
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </form>
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <p className="text-sm text-gray-600">
-              Puedes cambiar esta información en cualquier momento desde tu perfil.
+      {/* Main Content */}
+      <main className="flex-1 container mx-auto px-4 py-12 md:py-20">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-10 space-y-4 fade-in">
+            <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-primary/10 mb-2">
+              <Calendar className="h-7 w-7 text-primary" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-display">
+              ¿Cuál es tu edad?
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-lg mx-auto">
+              Personalizamos las recomendaciones según tu etapa de vida
             </p>
-          </CardFooter>
-        </Card>
+          </div>
+
+          <Card className="animate-in border-border/50">
+            <CardContent className="pt-8">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {error && (
+                  <div className="bg-destructive/10 border-2 border-destructive/20 text-destructive px-4 py-3 rounded-lg text-sm">
+                    {error}
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  <Label htmlFor="age" className="text-base font-medium">
+                    Edad (años)
+                  </Label>
+                  <Input
+                    id="age"
+                    type="number"
+                    min="18"
+                    max="100"
+                    placeholder="Ej: 30"
+                    value={ageValue}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      // Solo permitir números y limitar a 3 dígitos
+                      if (value === "" || (/^\d+$/.test(value) && value.length <= 3)) {
+                        setAgeValue(value)
+                        setError("")
+                      }
+                    }}
+                    className={`text-lg ${error ? "border-destructive focus-visible:border-destructive" : ""}`}
+                    autoFocus
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Debes tener al menos 18 años para usar este servicio
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                  <Link href="/gender-selection" className="flex-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="lg"
+                      className="w-full"
+                    >
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Atrás
+                    </Button>
+                  </Link>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="flex-1 group"
+                  >
+                    Continuar
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+            <div className="px-8 pb-8">
+              <p className="text-xs text-center text-muted-foreground">
+                Tu información se mantiene privada y segura
+              </p>
+            </div>
+          </Card>
+        </div>
       </main>
 
-      <footer className="py-4 text-center text-sm text-gray-600">
-        <p>Suplementos+ &copy; {new Date().getFullYear()} - Todos los derechos reservados</p>
+      {/* Footer */}
+      <footer className="py-6 text-center border-t border-border/40">
+        <p className="text-sm text-muted-foreground">
+          Suplementos+ &copy; {new Date().getFullYear()}
+        </p>
       </footer>
     </div>
   )

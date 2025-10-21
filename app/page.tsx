@@ -1,334 +1,343 @@
-import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Leaf, Shield, Dumbbell, Brain, FlaskRoundIcon as Flask, Target, ArrowRight, CheckCircle } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import {
+  ArrowRight,
+  Shield,
+  Zap,
+  Heart,
+  CheckCircle,
+  Sparkles,
+  Target,
+  FlaskConical
+} from "lucide-react"
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-teal-50">
-      <header className="container mx-auto py-6 px-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-teal-700">Suplementos+</h1>
-          <div className="space-x-2">
-            <Link href="/login">
-              <Button variant="outline" className="border-teal-600 text-teal-700 hover:bg-teal-50">
-                Iniciar Sesión
-              </Button>
+    <div className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-stone-50/30">
+      {/* Navigation Header */}
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center">
+          <div className="mr-4 flex">
+            <Link href="/" className="mr-6 flex items-center space-x-2">
+              <Sparkles className="h-6 w-6 text-primary" />
+              <span className="font-bold text-xl font-display">Suplementos+</span>
             </Link>
-            <Link href="/signup">
-              <Button className="bg-teal-600 hover:bg-teal-700 text-white">Registrarse</Button>
-            </Link>
+          </div>
+          <div className="flex flex-1 items-center justify-end space-x-2">
+            <nav className="flex items-center space-x-6 text-sm font-medium">
+              <Link
+                href="/about"
+                className="transition-colors hover:text-foreground/80 text-foreground/60"
+              >
+                Nosotros
+              </Link>
+              <Link
+                href="/contact"
+                className="transition-colors hover:text-foreground/80 text-foreground/60"
+              >
+                Contacto
+              </Link>
+            </nav>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        {/* Hero Section con diseño mejorado */}
-        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-500 via-teal-600 to-green-600 text-white mb-16 shadow-2xl">
-          <div className="absolute inset-0 bg-black opacity-10"></div>
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-teal-400 rounded-full opacity-20 blur-3xl"></div>
-          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-green-400 rounded-full opacity-20 blur-3xl"></div>
-          
-          <div className="relative z-10 px-8 py-16 md:py-24 text-center">
-            <div className="mb-6 inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-              <Shield className="h-4 w-4" />
-              <span className="text-sm font-medium">Basado en evidencia científica</span>
-            </div>
-            
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Encuentra los suplementos<br />
-              <span className="text-teal-100">perfectos para ti</span>
-            </h2>
-            
-            <p className="text-lg md:text-xl text-teal-50 max-w-3xl mx-auto mb-10 leading-relaxed">
-              Obtén recomendaciones personalizadas basadas en tus objetivos de salud o análisis de sangre.
-              Respaldado por más de 50,000 estudios científicos.
+      <main>
+        {/* Hero Section */}
+        <section className="container px-4 py-24 md:py-32 lg:py-40">
+          <div className="mx-auto max-w-4xl text-center space-y-8 fade-in">
+            <Badge variant="outline" className="mx-auto">
+              <Shield className="mr-1 h-3 w-3" />
+              Basado en ciencia
+            </Badge>
+
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight font-display">
+              Suplementos personalizados
+              <span className="block mt-2 text-gradient">
+                para tu salud
+              </span>
+            </h1>
+
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Recomendaciones personalizadas basadas en tus objetivos o análisis de sangre.
+              Respaldado por evidencia científica.
             </p>
-            
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <Link href="/gender-selection" className="group">
-                <Button className="relative overflow-hidden bg-white text-teal-700 hover:text-teal-800 px-8 py-6 text-lg shadow-xl transform transition-all duration-300 hover:scale-105">
-                  <span className="absolute inset-0 bg-gradient-to-r from-teal-50 to-green-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                  <span className="relative flex items-center">
-                    <Target className="mr-2 h-5 w-5" />
-                    Por Objetivos de Salud
-                  </span>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+              <Link href="/gender-selection">
+                <Button size="lg" className="group">
+                  <Target className="mr-2 h-5 w-5" />
+                  Comenzar ahora
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
-              
-              <div className="flex items-center gap-4">
-                <div className="hidden sm:block h-px w-8 bg-white/30"></div>
-                <span className="text-teal-100 font-medium">o</span>
-                <div className="hidden sm:block h-px w-8 bg-white/30"></div>
-              </div>
-              
-              <Link href="/analisis-sangre" className="group">
-                <Button variant="outline" className="bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white/20 px-8 py-6 text-lg shadow-xl transform transition-all duration-300 hover:scale-105">
-                  <Flask className="mr-2 h-5 w-5" />
-                  Por Análisis de Sangre
+              <Link href="/analisis-sangre">
+                <Button size="lg" variant="outline" className="group">
+                  <FlaskConical className="mr-2 h-5 w-5" />
+                  Análisis de sangre
                 </Button>
               </Link>
             </div>
-            
-            <div className="mt-12 flex justify-center gap-8 text-sm">
+
+            <div className="flex items-center justify-center gap-8 pt-8 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-teal-200" />
-                <span className="text-teal-100">Sin receta médica</span>
+                <CheckCircle className="h-4 w-4 text-emerald-600" />
+                <span>Gratis</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-teal-200" />
-                <span className="text-teal-100">100% personalizado</span>
+                <CheckCircle className="h-4 w-4 text-emerald-600" />
+                <span>Sin registro</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-teal-200" />
-                <span className="text-teal-100">Envío rápido</span>
+                <CheckCircle className="h-4 w-4 text-emerald-600" />
+                <span>100% privado</span>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Sección de las dos formas de obtener recomendaciones */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-teal-800 mb-8 text-center">Dos formas de obtener tus recomendaciones</h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Opción 1: Por Objetivos de Salud */}
-            <Card className="group relative overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-0">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-500 to-green-500"></div>
-              <CardHeader>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="h-12 w-12 bg-gradient-to-br from-teal-100 to-green-100 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <Target className="h-6 w-6 text-teal-700" />
+        {/* Features Section */}
+        <section className="container px-4 py-20 md:py-28">
+          <div className="mx-auto max-w-5xl">
+            <div className="text-center mb-16 space-y-4">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-display">
+                ¿Cómo funciona?
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Tres pasos simples para obtener tus recomendaciones personalizadas
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                {
+                  icon: Target,
+                  number: "01",
+                  title: "Elige tu método",
+                  description: "Selecciona entre objetivos de salud o análisis de sangre según tu preferencia.",
+                },
+                {
+                  icon: Zap,
+                  number: "02",
+                  title: "Responde preguntas",
+                  description: "Completa un breve cuestionario sobre tu salud, edad, género y objetivos.",
+                },
+                {
+                  icon: Heart,
+                  number: "03",
+                  title: "Recibe recomendaciones",
+                  description: "Obtén un plan personalizado con dosis, horarios y marcas disponibles en Uruguay.",
+                },
+              ].map((feature, index) => (
+                <Card key={index} className="hover-lift border-border/50">
+                  <CardHeader>
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                          <feature.icon className="h-6 w-6 text-primary" />
+                        </div>
+                        <span className="text-5xl font-bold text-muted-foreground/20 font-display">
+                          {feature.number}
+                        </span>
+                      </div>
+                    </div>
+                    <CardTitle className="text-xl">{feature.title}</CardTitle>
+                    <CardDescription className="text-base">
+                      {feature.description}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Two Methods Section */}
+        <section className="container px-4 py-20 md:py-28 bg-gradient-to-b from-stone-50/30 to-white">
+          <div className="mx-auto max-w-5xl">
+            <div className="text-center mb-16 space-y-4">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-display">
+                Dos formas de comenzar
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Elige el método que mejor se adapte a tu situación
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Health Goals Method */}
+              <Card className="hover-lift">
+                <div className="h-2 bg-gradient-to-r from-primary to-accent rounded-t-2xl" />
+                <CardHeader>
+                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mb-4">
+                    <Target className="h-7 w-7 text-primary" />
                   </div>
-                  <CardTitle className="text-2xl text-teal-800">Por Objetivos de Salud</CardTitle>
-                </div>
+                  <CardTitle className="text-2xl">Por Objetivos de Salud</CardTitle>
+                  <CardDescription className="text-base mt-2">
+                    Ideal si tienes metas específicas como mejorar energía, desarrollar músculo o fortalecer tu sistema inmune.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <ul className="space-y-3">
+                    {[
+                      "Proceso guiado paso a paso",
+                      "Considera tu edad y género",
+                      "Múltiples objetivos simultáneos",
+                      "Restricciones dietéticas incluidas"
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <CheckCircle className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm text-muted-foreground">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href="/gender-selection" className="block pt-4">
+                    <Button className="w-full" size="lg">
+                      Comenzar cuestionario
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              {/* Blood Analysis Method */}
+              <Card className="hover-lift">
+                <div className="h-2 bg-gradient-to-r from-rose-500 to-orange-500 rounded-t-2xl" />
+                <CardHeader>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-rose-500/20 to-orange-500/20 flex items-center justify-center">
+                      <FlaskConical className="h-7 w-7 text-rose-600" />
+                    </div>
+                    <Badge variant="destructive">Nuevo</Badge>
+                  </div>
+                  <CardTitle className="text-2xl">Por Análisis de Sangre</CardTitle>
+                  <CardDescription className="text-base mt-2">
+                    Recomendaciones precisas basadas en tus valores de laboratorio reales.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <ul className="space-y-3">
+                    {[
+                      "Detecta deficiencias nutricionales",
+                      "Vitaminas: D, B12, A, E, K",
+                      "Minerales: Hierro, Calcio, Magnesio",
+                      "Análisis de indicadores metabólicos"
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <CheckCircle className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm text-muted-foreground">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href="/analisis-sangre" className="block pt-4">
+                    <Button className="w-full bg-rose-600 hover:bg-rose-700" size="lg">
+                      Analizar resultados
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="container px-4 py-20 md:py-28">
+          <div className="mx-auto max-w-4xl">
+            <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+              <CardHeader className="text-center pb-8">
+                <CardTitle className="text-3xl md:text-4xl font-display">
+                  ¿Listo para comenzar?
+                </CardTitle>
+                <CardDescription className="text-lg mt-4">
+                  Obtén tus recomendaciones personalizadas en menos de 5 minutos
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">
-                  Responde algunas preguntas sobre tus metas de salud, edad, género y restricciones dietéticas
-                  para recibir recomendaciones personalizadas.
-                </p>
-                <ul className="space-y-2 mb-6">
-                  <li className="flex items-center gap-2 group/item">
-                    <CheckCircle className="h-5 w-5 text-green-600 group-hover/item:scale-110 transition-transform" />
-                    <span className="text-gray-700 group-hover/item:text-teal-700 transition-colors">Proceso guiado paso a paso</span>
-                  </li>
-                  <li className="flex items-center gap-2 group/item">
-                    <CheckCircle className="h-5 w-5 text-green-600 group-hover/item:scale-110 transition-transform" />
-                    <span className="text-gray-700 group-hover/item:text-teal-700 transition-colors">Considera restricciones dietéticas</span>
-                  </li>
-                  <li className="flex items-center gap-2 group/item">
-                    <CheckCircle className="h-5 w-5 text-green-600 group-hover/item:scale-110 transition-transform" />
-                    <span className="text-gray-700 group-hover/item:text-teal-700 transition-colors">Múltiples objetivos de salud</span>
-                  </li>
-                </ul>
+              <CardContent className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/gender-selection">
-                  <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">
-                    Comenzar Cuestionario
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                  <Button size="xl" className="min-w-[200px]">
+                    <Target className="mr-2 h-5 w-5" />
+                    Comenzar ahora
+                  </Button>
+                </Link>
+                <Link href="/privacidad">
+                  <Button size="xl" variant="outline" className="min-w-[200px]">
+                    Ver política de privacidad
                   </Button>
                 </Link>
               </CardContent>
             </Card>
-
-            {/* Opción 2: Por Análisis de Sangre */}
-            <Card className="group relative overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-0">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-orange-500"></div>
-              <CardHeader>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="h-12 w-12 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <Flask className="h-6 w-6 text-red-600" />
-                  </div>
-                  <CardTitle className="text-2xl text-teal-800">Por Análisis de Sangre</CardTitle>
-                </div>
-                <Badge className="bg-gradient-to-r from-red-100 to-orange-100 text-red-800 w-fit border-0">
-                  ¡Nuevo! Análisis Completo
-                </Badge>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">
-                  Ingresa tus resultados de análisis de sangre para detectar deficiencias y recibir 
-                  recomendaciones precisas de suplementación.
-                </p>
-                <ul className="space-y-2 mb-6">
-                  <li className="flex items-center gap-2 group/item">
-                    <CheckCircle className="h-5 w-5 text-green-600 group-hover/item:scale-110 transition-transform" />
-                    <span className="text-gray-700 group-hover/item:text-red-600 transition-colors">Vitaminas: D, B12, A, E, K</span>
-                  </li>
-                  <li className="flex items-center gap-2 group/item">
-                    <CheckCircle className="h-5 w-5 text-green-600 group-hover/item:scale-110 transition-transform" />
-                    <span className="text-gray-700 group-hover/item:text-red-600 transition-colors">Minerales: Hierro, Calcio, Magnesio</span>
-                  </li>
-                  <li className="flex items-center gap-2 group/item">
-                    <CheckCircle className="h-5 w-5 text-green-600 group-hover/item:scale-110 transition-transform" />
-                    <span className="text-gray-700 group-hover/item:text-red-600 transition-colors">Indicadores: Glucosa, Cortisol, Electrolitos</span>
-                  </li>
-                </ul>
-                <Link href="/analisis-sangre">
-                  <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
-                    Analizar Resultados
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        <section className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          <Card className="group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-white to-teal-50/30">
-            <CardHeader className="text-center">
-              <div className="mx-auto bg-gradient-to-br from-teal-100 to-green-100 p-3 rounded-full w-16 h-16 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                <Dumbbell className="h-8 w-8 text-teal-700" />
-              </div>
-              <CardTitle className="text-teal-700 group-hover:text-teal-800 transition-colors">Ganancia Muscular</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 text-center group-hover:text-gray-700 transition-colors">
-                Suplementos diseñados para ayudarte a aumentar masa muscular y mejorar tu rendimiento físico.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-white to-teal-50/30">
-            <CardHeader className="text-center">
-              <div className="mx-auto bg-gradient-to-br from-teal-100 to-green-100 p-3 rounded-full w-16 h-16 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                <Leaf className="h-8 w-8 text-teal-700" />
-              </div>
-              <CardTitle className="text-teal-700 group-hover:text-teal-800 transition-colors">Pérdida de Peso</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 text-center group-hover:text-gray-700 transition-colors">
-                Encuentra suplementos que apoyan tus objetivos de pérdida de peso de manera saludable y efectiva.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-white to-teal-50/30">
-            <CardHeader className="text-center">
-              <div className="mx-auto bg-gradient-to-br from-teal-100 to-green-100 p-3 rounded-full w-16 h-16 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                <Shield className="h-8 w-8 text-teal-700" />
-              </div>
-              <CardTitle className="text-teal-700 group-hover:text-teal-800 transition-colors">Sistema Inmune</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 text-center group-hover:text-gray-700 transition-colors">
-                Suplementos para fortalecer tu sistema inmunológico y mantener tu salud en óptimas condiciones.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-white to-teal-50/30">
-            <CardHeader className="text-center">
-              <div className="mx-auto bg-gradient-to-br from-teal-100 to-green-100 p-3 rounded-full w-16 h-16 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                <Brain className="h-8 w-8 text-teal-700" />
-              </div>
-              <CardTitle className="text-teal-700 group-hover:text-teal-800 transition-colors">Reducción de Estrés</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 text-center group-hover:text-gray-700 transition-colors">
-                Descubre suplementos que te ayudan a manejar el estrés y mejorar tu bienestar mental.
-              </p>
-            </CardContent>
-          </Card>
-        </section>
-
-        <section className="bg-white rounded-lg shadow-sm p-8 mb-16">
-          <h2 className="text-3xl font-bold text-teal-800 mb-6 text-center">Cómo Funciona</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-teal-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                <span className="text-teal-700 font-bold text-xl">1</span>
-              </div>
-              <h3 className="text-xl font-semibold text-teal-700 mb-2">Elige tu método</h3>
-              <p className="text-gray-600">
-                Selecciona si quieres recomendaciones por objetivos de salud o por análisis de sangre.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-teal-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                <span className="text-teal-700 font-bold text-xl">2</span>
-              </div>
-              <h3 className="text-xl font-semibold text-teal-700 mb-2">Recibe recomendaciones</h3>
-              <p className="text-gray-600">
-                Obtén suplementos personalizados basados en evidencia científica actualizada.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-teal-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                <span className="text-teal-700 font-bold text-xl">3</span>
-              </div>
-              <h3 className="text-xl font-semibold text-teal-700 mb-2">Compra con confianza</h3>
-              <p className="text-gray-600">Accede a información detallada y enlaces para comprar en Mercado Libre.</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-teal-800 mb-6">¿Listo para encontrar tus suplementos ideales?</h2>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/gender-selection">
-              <Button className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-6 text-lg">
-                <Target className="mr-2 h-5 w-5" />
-                Comenzar con Objetivos
-              </Button>
-            </Link>
-            <span className="text-gray-500">o</span>
-            <Link href="/analisis-sangre">
-              <Button variant="outline" className="border-red-600 text-red-700 hover:bg-red-50 px-8 py-6 text-lg">
-                <Flask className="mr-2 h-5 w-5" />
-                Comenzar con Análisis
-              </Button>
-            </Link>
           </div>
         </section>
       </main>
 
-      <footer className="bg-teal-800 text-white py-8">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4">Suplementos+</h3>
-              <p className="text-teal-100">
-                Ayudando a los uruguayos a encontrar los suplementos adecuados para sus necesidades de salud.
+      {/* Footer */}
+      <footer className="border-t border-border/40 bg-stone-50/50">
+        <div className="container px-4 py-12 md:py-16">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div className="md:col-span-2">
+              <Link href="/" className="flex items-center space-x-2 mb-4">
+                <Sparkles className="h-6 w-6 text-primary" />
+                <span className="font-bold text-xl font-display">Suplementos+</span>
+              </Link>
+              <p className="text-sm text-muted-foreground max-w-sm">
+                Ayudando a los uruguayos a encontrar los suplementos adecuados
+                para sus necesidades de salud, basado en evidencia científica.
               </p>
             </div>
             <div>
-              <h3 className="text-xl font-bold mb-4">Enlaces Rápidos</h3>
+              <h3 className="font-semibold mb-4">Enlaces</h3>
               <ul className="space-y-2">
-                <li>
-                  <Link href="/about" className="text-teal-100 hover:text-white">
-                    Acerca de Nosotros
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="text-teal-100 hover:text-white">
-                    Contacto
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/terms" className="text-teal-100 hover:text-white">
-                    Términos y Condiciones
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy" className="text-teal-100 hover:text-white">
-                    Política de Privacidad
-                  </Link>
-                </li>
+                {[
+                  { href: "/about", label: "Acerca de" },
+                  { href: "/contact", label: "Contacto" },
+                  { href: "/terms", label: "Términos" },
+                  { href: "/privacy", label: "Privacidad" },
+                ].map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
             <div>
-              <h3 className="text-xl font-bold mb-4">Aviso Legal</h3>
-              <p className="text-teal-100 text-sm">
-                La información proporcionada en esta aplicación es solo para fines educativos y no pretende ser un
-                consejo médico. Consulte siempre con un profesional de la salud antes de comenzar cualquier régimen de
-                suplementos.
-              </p>
+              <h3 className="font-semibold mb-4">Recursos</h3>
+              <ul className="space-y-2">
+                {[
+                  { href: "#", label: "Blog" },
+                  { href: "#", label: "FAQs" },
+                  { href: "#", label: "Guías" },
+                  { href: "#", label: "Soporte" },
+                ].map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
-          <div className="border-t border-teal-700 mt-8 pt-4 text-center text-teal-100">
-            <p>&copy; {new Date().getFullYear()} Suplementos+. Todos los derechos reservados.</p>
+          <div className="border-t border-border/40 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-sm text-muted-foreground">
+                &copy; {new Date().getFullYear()} Suplementos+. Todos los derechos reservados.
+              </p>
+              <p className="text-xs text-muted-foreground max-w-md text-center md:text-right">
+                Esta información es solo para fines educativos. Consulte con un profesional de salud
+                antes de comenzar cualquier suplementación.
+              </p>
+            </div>
           </div>
         </div>
       </footer>

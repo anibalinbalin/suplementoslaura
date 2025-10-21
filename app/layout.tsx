@@ -7,7 +7,18 @@ import { UserProvider } from "@/context/user-context"
 import { PrivacyConsent } from "@/components/privacy-consent"
 import { Toaster } from "@/components/ui/sonner"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+})
+
+const interDisplay = Inter({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-display",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   title: "Suplementos+",
@@ -21,8 +32,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" suppressHydrationWarning>
-      <body className={inter.className}>
+    <html lang="es" suppressHydrationWarning className={`${inter.variable} ${interDisplay.variable}`}>
+      <body className="font-sans">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <UserProvider>
             <PrivacyConsent />
